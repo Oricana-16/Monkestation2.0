@@ -49,7 +49,7 @@
 	var/ghost_notification_message = "IT'S LOOSE"
 
 	flags_1 = SUPERMATTER_IGNORES_1
-	resistance_flags = INDESTRUCTIBLE | LAVA_PROOF | FIRE_PROOF | UNACIDABLE | ACID_PROOF | FREEZE_PROOF
+	resistance_flags = INDESTRUCTIBLE | LAVA_PROOF | FIRE_PROOF | UNACIDABLE | ACID_PROOF | FREEZE_PROOF | SHUTTLE_CRUSH_PROOF
 	obj_flags = CAN_BE_HIT | DANGEROUS_POSSESSION
 
 /obj/singularity/Initialize(mapload, starting_energy = 50)
@@ -167,7 +167,7 @@
 	dissipate(seconds_per_tick)
 	radiation_pulse(src, 4, intensity = min(5000, (energy * 4.5) + 1000), should_rad_act = FALSE)
 	for(var/obj/collector in range(5, src))
-		if(!istype(collector, /obj/machinery/power/rad_collector))
+		if(!istype(collector, /obj/machinery/power/rad_collector) && !isartifact(collector))
 			continue
 		collector.rad_act(intensity = min(2500, (energy * 2) + 500))
 	check_energy()

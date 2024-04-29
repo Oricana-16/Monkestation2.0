@@ -110,6 +110,8 @@
 		init_sprite_accessory_subtypes(/datum/sprite_accessory/arachnid_chelicerae, GLOB.arachnid_chelicerae_list)
 	if(!GLOB.goblin_ears_list.len)
 		init_sprite_accessory_subtypes(/datum/sprite_accessory/goblin_ears, GLOB.goblin_ears_list)
+	if(!GLOB.floran_leaves_list.len)
+		init_sprite_accessory_subtypes(/datum/sprite_accessory/floran_leaves, GLOB.floran_leaves_list)
 //Monkestation Addition End
 
 	//For now we will always return none for tail_human and ears. | "For now" he says.
@@ -142,7 +144,8 @@
 		"arachnid_appendages" = pick(GLOB.arachnid_appendages_list), //Monkestation Addition
 		"arachnid_chelicerae" = pick(GLOB.arachnid_chelicerae_list), //Monkestation Addition
 		"animecolor" = "#[pick("7F","FF")][pick("7F","FF")][pick("7F","FF")]", //Monkestation Addition
-		"goblin_ears" = pick(GLOB.goblin_ears_list) //Monkestation Addition
+		"goblin_ears" = pick(GLOB.goblin_ears_list), //Monkestation Addition
+		"floran_leaves" = pick(GLOB.floran_leaves_list), //Monkestation Addition
 	))
 
 /proc/random_hairstyle(gender)
@@ -609,8 +612,6 @@ GLOBAL_LIST_EMPTY(species_list)
 
 #define ISADVANCEDTOOLUSER(mob) (HAS_TRAIT(mob, TRAIT_ADVANCEDTOOLUSER) && !HAS_TRAIT(mob, TRAIT_DISCOORDINATED_TOOL_USER))
 
-#define IS_IN_STASIS(mob) (mob.has_status_effect(/datum/status_effect/grouped/stasis) || mob.has_status_effect(/datum/status_effect/embryonic))
-
 /// Gets the client of the mob, allowing for mocking of the client.
 /// You only need to use this if you know you're going to be mocking clients somewhere else.
 #define GET_CLIENT(mob) (##mob.client || ##mob.mock_client)
@@ -637,7 +638,7 @@ GLOBAL_LIST_EMPTY(species_list)
 		moblist += mob_to_sort
 	for(var/mob/dead/new_player/mob_to_sort in sortmob)
 		moblist += mob_to_sort
-	for(var/mob/living/simple_animal/slime/mob_to_sort in sortmob)
+	for(var/mob/living/basic/slime/mob_to_sort in sortmob)
 		moblist += mob_to_sort
 	for(var/mob/living/simple_animal/mob_to_sort in sortmob)
 		// We've already added slimes.

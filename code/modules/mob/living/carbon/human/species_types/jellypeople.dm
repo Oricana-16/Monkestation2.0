@@ -15,8 +15,9 @@
 		EYECOLOR,
 	)
 	inherent_traits = list(
+		TRAIT_CAN_USE_FLIGHT_POTION,
 		TRAIT_TOXINLOVER,
-		TRAIT_NOBLOOD,
+		TRAIT_NOBLOOD
 	)
 	mutanttongue = /obj/item/organ/internal/tongue/jelly
 	mutantlungs = /obj/item/organ/internal/lungs/slime
@@ -36,6 +37,7 @@
 	inherent_factions = list(FACTION_SLIME)
 	species_language_holder = /datum/language_holder/jelly
 	ass_image = 'icons/ass/assslime.png'
+	wing_types = list(/obj/item/organ/external/wings/functional/slime)
 
 	bodypart_overrides = list(
 		BODY_ZONE_L_ARM = /obj/item/bodypart/arm/left/jelly,
@@ -272,12 +274,12 @@
 	if(!isslimeperson(H))
 		return
 	CHECK_DNA_AND_SPECIES(H)
-	H.visible_message("<span class='notice'>[owner] gains a look of \
-		concentration while standing perfectly still.</span>",
-		"<span class='notice'>You focus intently on moving your body while \
-		standing perfectly still...</span>")
+	H.visible_message(
+		span_notice("[owner] gains a look of concentration while standing perfectly still."),
+		span_notice("You focus intently on moving your body while standing perfectly still..."),
+	)
 
-	H.notransform = TRUE
+	ADD_TRAIT(src, TRAIT_NO_TRANSFORM, REF(src))
 
 	if(do_after(owner, delay = 6 SECONDS, target = owner, timed_action_flags = IGNORE_HELD_ITEM))
 		if(H.blood_volume >= BLOOD_VOLUME_SLIME_SPLIT)
@@ -287,7 +289,7 @@
 	else
 		to_chat(H, span_warning("...but fail to stand perfectly still!"))
 
-	H.notransform = FALSE
+	REMOVE_TRAIT(src, TRAIT_NO_TRANSFORM, REF(src))
 
 /datum/action/innate/split_body/proc/make_dupe()
 	var/mob/living/carbon/human/H = owner
@@ -313,7 +315,7 @@
 		SEND_SIGNAL(spare, COMSIG_NANITE_SYNC, owner_nanites, TRUE, TRUE) //The trues are to copy activation as well
 
 	H.blood_volume *= 0.45
-	H.notransform = 0
+	REMOVE_TRAIT(H, TRAIT_NO_TRANSFORM, REF(src))
 
 	var/datum/species/jelly/slime/origin_datum = H.dna.species
 	origin_datum.bodies |= spare
@@ -323,10 +325,10 @@
 
 	H.transfer_quirk_datums(spare)
 	H.mind.transfer_to(spare)
-	spare.visible_message("<span class='warning'>[H] distorts as a new body \
-		\"steps out\" of [H.p_them()].</span>",
-		"<span class='notice'>...and after a moment of disorentation, \
-		you're besides yourself!</span>")
+	spare.visible_message(
+		span_warning("[H] distorts as a new body \"steps out\" of [H.p_them()]."),
+		span_notice("...and after a moment of disorentation, you're besides yourself!"),
+	)
 
 
 /datum/action/innate/swap_body
@@ -495,7 +497,7 @@
 	/// How strong is our glow
 	var/glow_intensity = LUMINESCENT_DEFAULT_GLOW
 	/// Internal dummy used to glow (very cool)
-	var/obj/effect/dummy/luminescent_glow/glow
+	var/obj/effect/dummy/lighting_obj/moblight/glow
 	/// The slime extract we currently have integrated
 	var/obj/item/slime_extract/current_extract
 	/// A list of all luminescent related actions we have
@@ -503,25 +505,16 @@
 	/// The cooldown of us using exteracts
 	COOLDOWN_DECLARE(extract_cooldown)
 
-//Species datums don't normally implement destroy, but JELLIES SUCK ASS OUT OF A STEEL STRAW
-/datum/species/jelly/luminescent/Destroy(force, ...)
+//Species datums don't normally implement destroy, but JELLIES SUCK ASS OUT OF A STEEL STRAW and have to i guess
+/datum/species/jelly/luminescent/Destroy(force)
 	current_extract = null
 	QDEL_NULL(glow)
 	QDEL_LIST(luminescent_actions)
 	return ..()
 
-
-/datum/species/jelly/luminescent/on_species_loss(mob/living/carbon/C)
-	. = ..()
-	if(current_extract)
-		current_extract.forceMove(C.drop_location())
-		current_extract = null
-	QDEL_NULL(glow)
-	QDEL_LIST(luminescent_actions)
-
 /datum/species/jelly/luminescent/on_species_gain(mob/living/carbon/new_jellyperson, datum/species/old_species)
 	. = ..()
-	glow = new(new_jellyperson)
+	glow = new_jellyperson.mob_light(light_type = /obj/effect/dummy/lighting_obj/moblight/species)
 	update_glow(new_jellyperson)
 
 	luminescent_actions = list()
@@ -538,26 +531,19 @@
 	extract_major.Grant(new_jellyperson)
 	luminescent_actions += integrate_extract
 
-/// Updates the glow of our internal glow thing.
-/datum/species/jelly/luminescent/proc/update_glow(mob/living/carbon/C, intensity)
+/datum/species/jelly/luminescent/on_species_loss(mob/living/carbon/C)
+	. = ..()
+	if(current_extract)
+		current_extract.forceMove(C.drop_location())
+		current_extract = null
+	QDEL_NULL(glow)
+	QDEL_LIST(luminescent_actions)
+
+/// Updates the glow of our internal glow object
+/datum/species/jelly/luminescent/proc/update_glow(mob/living/carbon/human/glowie, intensity)
 	if(intensity)
 		glow_intensity = intensity
-	glow.set_light_range_power_color(glow_intensity, glow_intensity, C.dna.features["mcolor"])
-
-/obj/effect/dummy/luminescent_glow
-	name = "luminescent glow"
-	desc = "Tell a coder if you're seeing this."
-	icon_state = "nothing"
-	light_system = MOVABLE_LIGHT
-	light_outer_range = LUMINESCENT_DEFAULT_GLOW
-	light_power = 2.5
-	light_color = COLOR_WHITE
-
-/obj/effect/dummy/luminescent_glow/Initialize(mapload)
-	. = ..()
-	if(!isliving(loc))
-		return INITIALIZE_HINT_QDEL
-
+	glow.set_light_range_power_color(glow_intensity, glow_intensity, glowie.dna.features["mcolor"])
 
 /datum/action/innate/integrate_extract
 	name = "Integrate Extract"

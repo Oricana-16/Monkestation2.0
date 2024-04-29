@@ -118,7 +118,7 @@ CIGARETTE PACKETS ARE IN FANCY.DM
 	name = "firebrand"
 	desc = "An unlit firebrand. It makes you wonder why it's not just called a stick."
 	smoketime = 40 SECONDS
-	custom_materials = list(/datum/material/wood = MINERAL_MATERIAL_AMOUNT)
+	custom_materials = list(/datum/material/wood = SHEET_MATERIAL_AMOUNT)
 	grind_results = list(/datum/reagent/carbon = 2)
 
 /obj/item/match/firebrand/Initialize(mapload)
@@ -138,6 +138,8 @@ CIGARETTE PACKETS ARE IN FANCY.DM
 	body_parts_covered = null
 	grind_results = list()
 	heat = 1000
+	supports_variations_flags = CLOTHING_SNOUTED_VARIATION
+	throw_verb = "flick"
 	/// Whether this cigarette has been lit.
 	var/lit = FALSE
 	/// Whether this cigarette should start lit.
@@ -217,16 +219,26 @@ CIGARETTE PACKETS ARE IN FANCY.DM
 	if(!lighting_text)
 		return ..()
 
-	if(!reagents.has_reagent(/datum/reagent/oxygen)) //cigarettes need oxygen
-		var/datum/gas_mixture/air = return_air()
-		if(!air || !air.has_gas(/datum/gas/oxygen, 1)) //or oxygen on a tile to burn
-			to_chat(user, span_notice("Your [name] needs a source of oxygen to burn."))
-			return ..()
+	if(!check_oxygen(user)) //cigarettes need oxygen
+		balloon_alert(user, "no air!")
+		return ..()
 
 	if(smoketime > 0)
 		light(lighting_text)
 	else
 		to_chat(user, span_warning("There is nothing to smoke!"))
+
+/// Checks that we have enough air to smoke
+/obj/item/clothing/mask/cigarette/proc/check_oxygen(mob/user)
+	if (reagents.has_reagent(/datum/reagent/oxygen))
+		return TRUE
+	var/datum/gas_mixture/air = return_air()
+	if (!isnull(air) && air.has_gas(/datum/gas/oxygen, 1))
+		return TRUE
+	if (!iscarbon(user))
+		return FALSE
+	var/mob/living/carbon/the_smoker = user
+	return the_smoker.can_breathe_helmet()
 
 /obj/item/clothing/mask/cigarette/afterattack(obj/item/reagent_containers/cup/glass, mob/user, proximity)
 	. = ..()
@@ -331,9 +343,24 @@ CIGARETTE PACKETS ARE IN FANCY.DM
 		return
 	var/to_smoke = smoke_all ? (reagents.total_volume * (dragtime / smoketime)) : REAGENTS_METABOLISM
 	var/mob/living/carbon/smoker = loc
-	if(!istype(smoker) || src != smoker.wear_mask)
-		reagents.remove_any(to_smoke)
-		return
+	// These checks are a bit messy but at least they're fairly readable
+	// Check if the smoker is a carbon mob, since it needs to have wear_mask
+	if(!istype(smoker))
+		// If not, check if it's a gas mask
+		if(!istype(smoker, /obj/item/clothing/mask/gas))
+			reagents.remove_any(to_smoke)
+			return
+
+		smoker = smoker.loc
+
+		// If it is, check if that mask is on a carbon mob
+		if(!istype(smoker) || smoker.get_item_by_slot(ITEM_SLOT_MASK) != loc)
+			reagents.remove_any(to_smoke)
+			return
+	else
+		if(src != smoker.wear_mask)
+			reagents.remove_any(to_smoke)
+			return
 
 	reagents.expose(smoker, INGEST, min(to_smoke / reagents.total_volume, 1))
 	var/obj/item/organ/internal/lungs/lungs = smoker.get_organ_slot(ORGAN_SLOT_LUNGS)
@@ -347,11 +374,10 @@ CIGARETTE PACKETS ARE IN FANCY.DM
 	var/mob/living/user = isliving(loc) ? loc : null
 	var/turf/location = get_turf(src)
 	user?.ignite_mob()
-	if(!reagents.has_reagent(/datum/reagent/oxygen)) //cigarettes need oxygen
-		var/datum/gas_mixture/air = return_air()
-		if(!air || !air.has_gas(/datum/gas/oxygen, 1)) //or oxygen on a tile to burn
-			extinguish()
-			return
+
+	if(!check_oxygen(user))
+		extinguish()
+		return
 
 	location.pollute_turf(pollution_type, 5, POLLUTION_PASSIVE_EMITTER_CAP)
 
@@ -467,6 +493,7 @@ CIGARETTE PACKETS ARE IN FANCY.DM
 	chem_volume = 50
 	list_reagents = null
 	choke_time_max = 40 SECONDS
+	supports_variations_flags = CLOTHING_SNOUTED_VARIATION
 
 /obj/item/clothing/mask/cigarette/rollie/Initialize(mapload)
 	name = pick(list(
@@ -586,6 +613,7 @@ CIGARETTE PACKETS ARE IN FANCY.DM
 	smoketime = 20 MINUTES
 	chem_volume = 80
 	list_reagents = list(/datum/reagent/drug/nicotine = 40)
+	supports_variations_flags = CLOTHING_SNOUTED_VARIATION
 
 /obj/item/clothing/mask/cigarette/cigar/havana
 	name = "premium Havanian cigar"
@@ -596,6 +624,7 @@ CIGARETTE PACKETS ARE IN FANCY.DM
 	smoketime = 30 MINUTES
 	chem_volume = 60
 	list_reagents = list(/datum/reagent/drug/nicotine = 45)
+	supports_variations_flags = CLOTHING_SNOUTED_VARIATION
 
 /obj/item/cigbutt
 	name = "cigarette butt"
@@ -628,6 +657,7 @@ CIGARETTE PACKETS ARE IN FANCY.DM
 	list_reagents = null
 	w_class = WEIGHT_CLASS_SMALL
 	choke_forever = TRUE
+	supports_variations_flags = CLOTHING_SNOUTED_VARIATION
 	///name of the stuff packed inside this pipe
 	var/packeditem
 
@@ -713,7 +743,7 @@ CIGARETTE PACKETS ARE IN FANCY.DM
 	resistance_flags = FIRE_PROOF
 	grind_results = list(/datum/reagent/iron = 1, /datum/reagent/fuel = 5, /datum/reagent/fuel/oil = 5)
 	custom_price = PAYCHECK_CREW * 1.1
-	light_system = MOVABLE_LIGHT
+	light_system = OVERLAY_LIGHT
 	light_outer_range = 2
 	light_power = 0.6
 	light_color = LIGHT_COLOR_FIRE
@@ -1086,21 +1116,25 @@ CIGARETTE PACKETS ARE IN FANCY.DM
 	if(screw && (obj_flags & EMAGGED))
 		to_chat(user, span_warning("[src] can't be modified!"))
 
-/obj/item/clothing/mask/vape/emag_act(mob/user)// I WON'T REGRET WRITTING THIS, SURLY.
-	if(screw)
-		if(!(obj_flags & EMAGGED))
-			obj_flags |= EMAGGED
-			super = FALSE
-			to_chat(user, span_warning("You maximize the voltage of [src]."))
-			icon_state = "vape_open_high"
-			set_greyscale(new_config = /datum/greyscale_config/vape/open_high)
-			var/datum/effect_system/spark_spread/sp = new /datum/effect_system/spark_spread //for effect
-			sp.set_up(5, 1, src)
-			sp.start()
-		else
-			to_chat(user, span_warning("[src] is already emagged!"))
-	else
-		to_chat(user, span_warning("You need to open the cap to do that!"))
+/obj/item/clothing/mask/vape/emag_act(mob/user, obj/item/card/emag/emag_card) // I WON'T REGRET WRITTING THIS, SURLY.
+
+	if (!screw)
+		balloon_alert(user, "open the cap first!")
+		return FALSE
+
+	if (obj_flags & EMAGGED)
+		balloon_alert(user, "already emagged!")
+		return FALSE
+
+	obj_flags |= EMAGGED
+	super = FALSE
+	balloon_alert(user, "voltage maximized")
+	icon_state = "vape_open_high"
+	set_greyscale(new_config = /datum/greyscale_config/vape/open_high)
+	var/datum/effect_system/spark_spread/sp = new /datum/effect_system/spark_spread //for effect
+	sp.set_up(5, 1, src)
+	sp.start()
+	return TRUE
 
 /obj/item/clothing/mask/vape/attack_self(mob/user)
 	if(reagents.total_volume > 0)

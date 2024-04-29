@@ -5,13 +5,12 @@
 	max_occurrences = 1
 
 	min_players = 35  //monkie edit: 20 to 35
-
-	earliest_start = 90 MINUTES //monkie edit: 20 to 90
-	dynamic_should_hijack = TRUE
+	earliest_start = 60 MINUTES //monkie edit: 20 to 90
+	//dynamic_should_hijack = TRUE
 	category = EVENT_CATEGORY_ENTITIES
 	description = "Spawns a new blob overmind."
 
-/datum/round_event_control/blob/can_spawn_event(players, allow_magic = FALSE)
+/datum/round_event_control/blob/can_spawn_event(players, allow_magic = FALSE, fake_check = FALSE) //MONKESTATION ADDITION: fake_check = FALSE
 	if(EMERGENCY_PAST_POINT_OF_NO_RETURN) // no blobs if the shuttle is past the point of no return
 		return FALSE
 
@@ -30,8 +29,12 @@
 /datum/round_event/ghost_role/blob/spawn_role()
 	if(!GLOB.blobstart.len)
 		return MAP_ERROR
-	var/list/candidates = get_candidates(ROLE_BLOB, ROLE_BLOB)
-	if(!candidates.len)
+	var/icon/blob_icon = icon('icons/mob/nonhuman-player/blob.dmi', icon_state = "blob_core")
+	blob_icon.Blend("#9ACD32", ICON_MULTIPLY)
+	blob_icon.Blend(icon('icons/mob/nonhuman-player/blob.dmi', "blob_core_overlay"), ICON_OVERLAY)
+	var/image/blob_image = image(blob_icon)
+	var/list/candidates = SSpolling.poll_ghost_candidates(check_jobban = ROLE_BLOB, role = ROLE_BLOB, pic_source = blob_image, role_name_text = role_name)
+	if(!length(candidates))
 		return NOT_ENOUGH_PLAYERS
 	var/mob/dead/observer/new_blob = pick(candidates)
 	var/mob/camera/blob/BC = new_blob.become_overmind()

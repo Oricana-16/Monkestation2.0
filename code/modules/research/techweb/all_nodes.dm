@@ -46,10 +46,10 @@
 		"earmuffs",
 		"electropack",
 		"experi_scanner",
-		"experimentor",
 		"extinguisher",
 		"fax",
 		"fishing_rod",
+		"fishing_portal_generator",
 		"flashlight",
 		"fluid_ducts",
 		"foam_dart",
@@ -105,7 +105,6 @@
 		"shaker",
 		"shot_glass",
 		"signaler",
-		"slime_scanner",
 		"solar_panel",
 		"solar_tracker",
 		"space_heater",
@@ -119,6 +118,7 @@
 		"titaniumglass",
 		"toner_large",
 		"toner",
+		"tongs",
 		"toy_armblade",
 		"toy_balloon",
 		"toygun",
@@ -296,6 +296,14 @@
 		"swab",
 		"syringe",
 		"xlarge_beaker",
+		"vial",
+		"synth_eyes",
+		"synth_tongue",
+		"synth_liver",
+		"synth_lungs",
+		"synth_stomach",
+		"synth_ears",
+		"synth_heart",
 	)
 
 /datum/techweb_node/basic_circuitry
@@ -376,7 +384,14 @@
 		"component_printer",
 		"integrated_circuit",
 		"module_duplicator",
-		"usb_cable"
+		"usb_cable",
+		"chemical_synthesizer",
+		"weighted_splitter",
+		"chemical_splitter",
+		"chemical_mixer",
+		"chemical_filter",
+		"chemical_injector_bci",
+		"internal_chemical_tank",
 	)
 
 /////////////////////////Biotech/////////////////////////
@@ -398,13 +413,18 @@
 		"defibrillator",
 		"genescanner",
 		"healthanalyzer",
+		"antibodyscanner",
 		"med_spray_bottle",
 		"medical_kiosk",
 		"medigel",
 		"medipen_refiller",
-		"pandemic",
 		"soda_dispenser",
 		"extrapolator",
+		"diseasesplicer",
+		"incubator",
+		"diseaseanalyzer",
+		"centrifuge",
+		"path_data",
 	)
 	research_costs = list(TECHWEB_POINT_TYPE_GENERIC = 2500)
 	discount_experiments = list(/datum/experiment/dissection/human = 1000)
@@ -460,13 +480,19 @@
 		"gibber",
 		"griddle",
 		"microwave",
-		"monkey_recycler",
 		"oven",
 		"processor",
 		"range", // should be in a further node, probably
 		"reagentgrinder",
 		"smartfridge",
 		"stove",
+		"biomass_recycler",
+		"corral_corner",
+		"slime_extract_requestor",
+		"slime_market_pad",
+		"slime_market",
+		"slimevac",
+
 	)
 	research_costs = list(TECHWEB_POINT_TYPE_GENERIC = 4000)
 	discount_experiments = list(/datum/experiment/scanning/random/cytology = 3000) //Big discount to reinforce doing it.
@@ -481,6 +507,7 @@
 	design_ids = list(
 		"surgery_heal_brute_upgrade",
 		"surgery_heal_burn_upgrade",
+		"surgery_filter_upgrade", // monke edit: improved blood filter surgery
 	)
 	research_costs = list(TECHWEB_POINT_TYPE_GENERIC = 1000)
 
@@ -496,6 +523,7 @@
 		"surgery_heal_combo",
 		"surgery_lobotomy",
 		"surgery_wing_reconstruction",
+		"surgery_filter_upgrade_femto", // monke edit: advanced blood filter surgery
 	)
 	research_costs = list(TECHWEB_POINT_TYPE_GENERIC = 1500)
 
@@ -600,6 +628,8 @@
 		"thermomachine",
 		"w-recycler",
 		"welding_goggles",
+		"teg",
+		"teg-circ",
 	)
 	research_costs = list(TECHWEB_POINT_TYPE_GENERIC = 12500)
 	discount_experiments = list(/datum/experiment/scanning/random/material/easy = 7500)
@@ -641,6 +671,8 @@
 	design_ids = list(
 		"anomaly_neutralizer",
 		"reactive_armour",
+		"artifact_heater",
+		"artifact_xray",
 	)
 	research_costs = list(TECHWEB_POINT_TYPE_GENERIC = 5000)
 
@@ -689,7 +721,6 @@
 		"beacon",
 		"bluespace_crystal",
 		"telesci_gps",
-		"xenobioconsole",
 	)
 	research_costs = list(TECHWEB_POINT_TYPE_GENERIC = 2500)
 
@@ -1399,6 +1430,7 @@
 		"superresonator",
 		"triggermod",
 		"mining_scanner",
+		"mat_analyzer",
 	)//e a r l y    g a  m e)
 	research_costs = list(TECHWEB_POINT_TYPE_GENERIC = 2500)
 
@@ -1454,6 +1486,32 @@
 	research_costs = list(TECHWEB_POINT_TYPE_GENERIC = 4000)
 	discount_experiments = list(/datum/experiment/scanning/random/plants/traits = 2000,
 								/datum/experiment/scanning/random/plants/wild = 2000)
+
+/datum/techweb_node/fishing
+	id = "fishing"
+	display_name = "Fishing Technology"
+	description = "Cutting edge fishing advancements."
+	prereq_ids = list("base")
+	design_ids = list(
+		"fishing_rod_tech",
+		"stabilized_hook",
+		"fish_analyzer",
+	)
+	research_costs = list(TECHWEB_POINT_TYPE_GENERIC = 2000)
+	required_experiments = list(/datum/experiment/scanning/fish)
+
+/datum/techweb_node/fishing
+	id = "fishing"
+	display_name = "Fishing Technology"
+	description = "Cutting edge fishing advancements."
+	prereq_ids = list("base")
+	design_ids = list(
+		"fishing_rod_tech",
+		"stabilized_hook",
+		"fish_analyzer",
+	)
+	research_costs = list(TECHWEB_POINT_TYPE_GENERIC = 2000)
+	required_experiments = list(/datum/experiment/scanning/fish)
 
 /datum/techweb_node/exp_tools
 	id = "exp_tools"
@@ -2205,6 +2263,7 @@
 			continue
 		boost_item_paths |= item.item //allows deconning to unlock.
 
+	boost_item_paths |= /obj/item/malf_upgrade // MONKESTATION ADDITION -- The malf upgrade disk can now be used to get illegal technology
 
 ////////////////////////B.E.P.I.S. Locked Techs////////////////////////
 /datum/techweb_node/light_apps
@@ -2319,6 +2378,3 @@
 		"stabilized_hook",
 		"fish_analyzer",
 	)
-	research_costs = list(TECHWEB_POINT_TYPE_GENERIC = 2500)
-	hidden = TRUE
-	experimental = TRUE

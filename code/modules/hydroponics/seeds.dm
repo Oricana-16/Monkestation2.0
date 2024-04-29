@@ -175,8 +175,22 @@
 	copy_seed.desc = desc
 	copy_seed.productdesc = productdesc
 
-	copy_seed.reagents_add = reagents_add.Copy() // Faster than grabbing the list from genes.
+	copy_seed.reagents_add = reagents_add.Copy() // Fastetr than grabbing the list from genes.
 	copy_seed.harvest_age = harvest_age
+
+	copy_seed.species = species
+	copy_seed.icon_grow = icon_grow
+	copy_seed.icon_harvest = icon_harvest
+	copy_seed.icon_dead = icon_dead
+	copy_seed.growthstages = growthstages
+	copy_seed.growing_icon = growing_icon
+	copy_seed.seed_offset = seed_offset
+	copy_seed.traits_in_progress = traits_in_progress
+
+	if(istype(src, /obj/item/seeds/spliced))
+		var/obj/item/seeds/spliced/spliced_seed = src
+		var/obj/item/seeds/spliced/new_spliced_seed = copy_seed
+		new_spliced_seed.produce_list += spliced_seed.produce_list
 
 	return copy_seed
 
@@ -217,7 +231,7 @@
 
 
 /obj/item/seeds/bullet_act(obj/projectile/Proj) //Works with the Somatoray to modify plant variables.
-	if(istype(Proj, /obj/projectile/energy/florayield))
+	if(istype(Proj, /obj/projectile/energy/flora/yield))
 		var/rating = 1
 		if(istype(loc, /obj/machinery/hydroponics))
 			var/obj/machinery/hydroponics/H = loc
@@ -263,7 +277,7 @@
 		product_count = 10 + log(1.02) * (getYield() - 1)
 
 	if(user.client)
-		add_jobxp_chance(user.client, 1, JOB_BOTANIST, 50)
+		add_jobxp_chance(user.client, 1, JOB_BOTANIST, 20)
 
 	while(t_amount < product_count)
 		if(prob(25))
@@ -280,6 +294,9 @@
 			if(prob(10) && has_viable_mutations())
 				t_prod = create_valid_mutation(output_loc)
 			else
+				if(!product)
+					t_amount++
+					continue
 				t_prod = new product(output_loc, src)
 				if(parent.myseed.plantname != initial(parent.myseed.plantname))
 					t_prod.name = parent.myseed.plantname

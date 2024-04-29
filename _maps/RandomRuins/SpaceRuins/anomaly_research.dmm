@@ -1130,10 +1130,6 @@
 /obj/effect/decal/cleanable/cobweb/cobweb2,
 /turf/open/floor/iron/white,
 /area/misc/anomaly_research)
-"Ch" = (
-/obj/machinery/rnd/experimentor,
-/turf/open/floor/engine,
-/area/misc/anomaly_research)
 "Cl" = (
 /obj/effect/spawner/structure/window/plasma,
 /turf/open/floor/engine,
@@ -1142,7 +1138,6 @@
 /obj/effect/turf_decal/siding/purple{
 	dir = 9
 	},
-/obj/machinery/monkey_recycler,
 /obj/effect/decal/cleanable/dirt/dust,
 /turf/open/floor/iron/dark,
 /area/misc/anomaly_research)
@@ -2533,7 +2528,7 @@ oI
 Fg
 Fm
 Jy
-Ch
+CI
 pu
 AV
 xE

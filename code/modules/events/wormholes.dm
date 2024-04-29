@@ -23,6 +23,7 @@ GLOBAL_LIST_EMPTY(all_wormholes) // So we can pick wormholes to teleport to
 /datum/round_event/wormholes/setup()
 	announce_when = rand(0, 20)
 	end_when = rand(40, 80)
+	setup = TRUE //MONKESTATION ADDITION
 
 /datum/round_event/wormholes/start()
 	for(var/turf/open/floor/T in world)
@@ -53,7 +54,7 @@ GLOBAL_LIST_EMPTY(all_wormholes) // So we can pick wormholes to teleport to
 	icon = 'icons/obj/objects.dmi'
 	icon_state = "anom"
 	mech_sized = TRUE
-
+	light_on = FALSE
 
 /obj/effect/portal/wormhole/Initialize(mapload, _creator, _lifespan = 0, obj/effect/portal/_linked, automatic_link = FALSE, turf/hard_target_override)
 	. = ..()

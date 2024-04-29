@@ -259,7 +259,7 @@
 
 	// Add on any bonus lines on examine
 	if(description)
-		RegisterSignal(our_plant, COMSIG_PARENT_EXAMINE, PROC_REF(examine))
+		RegisterSignal(our_plant, COMSIG_ATOM_EXAMINE, PROC_REF(examine))
 	return TRUE
 
 /// Add on any unique examine text to the plant's examine text.
@@ -394,7 +394,7 @@
 	our_plant.investigate_log("zapped [key_name(target)] at [AREACOORD(target)]. Last touched by: [our_plant.fingerprintslast].", INVESTIGATE_BOTANY)
 	var/mob/living/carbon/target_carbon = target
 	var/obj/item/seeds/our_seed = our_plant.get_plant_seed()
-	var/power = our_seed.potency * rate
+	var/power = min(our_seed.potency, 100) * rate
 	if(prob(power))
 		target_carbon.electrocute_act(round(power), our_plant, 1, SHOCK_NOGLOVES)
 
@@ -449,7 +449,7 @@
 		return
 
 	var/obj/item/seeds/our_seed = our_plant.get_plant_seed()
-	our_plant.light_system = MOVABLE_LIGHT
+	our_plant.light_system = OVERLAY_LIGHT
 	our_plant.AddComponent(/datum/component/overlay_lighting, glow_range(our_seed), glow_power(our_seed), glow_color)
 
 /*
@@ -621,7 +621,7 @@
 
 	our_plant.flags_1 |= HAS_CONTEXTUAL_SCREENTIPS_1
 	RegisterSignal(our_plant, COMSIG_ATOM_REQUESTING_CONTEXT_FROM_ITEM, PROC_REF(on_requesting_context_from_item))
-	RegisterSignal(our_plant, COMSIG_PARENT_ATTACKBY, PROC_REF(make_battery))
+	RegisterSignal(our_plant, COMSIG_ATOM_ATTACKBY, PROC_REF(make_battery))
 
 /*
  * Signal proc for [COMSIG_ATOM_REQUESTING_CONTEXT_FROM_ITEM] to add context to plant batteries.

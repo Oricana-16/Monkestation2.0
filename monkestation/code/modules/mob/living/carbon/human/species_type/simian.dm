@@ -8,7 +8,8 @@
 	species_traits = list(
 		EYECOLOR,
 		LIPS,
-		NO_UNDERWEAR
+		NO_UNDERWEAR,
+		SPECIES_FUR,
 		)
 	inherent_traits = list(
 		TRAIT_VAULTING,
@@ -17,12 +18,8 @@
 		)
 
 	use_skintones = FALSE
-	use_fur = TRUE
 
-	inherent_biotypes = list(
-		MOB_ORGANIC,
-		MOB_HUMANOID
-		)
+	inherent_biotypes = MOB_ORGANIC | MOB_HUMANOID
 
 	mutanttongue = /obj/item/organ/internal/tongue/monkey
 	changesource_flags = MIRROR_BADMIN | MIRROR_PRIDE | MIRROR_MAGIC | RACE_SWAP | ERT_SPAWN
@@ -30,6 +27,7 @@
 	skinned_type = /obj/item/stack/sheet/animalhide/monkey
 	disliked_food = GROSS
 	liked_food = FRUIT | MEAT
+	uses_fur = TRUE
 	//deathsound = 'monkestation/sound/voice/simian/deathsound.ogg'
 	species_language_holder = /datum/language_holder/monkey
 	maxhealthmod = 0.85 //small = weak

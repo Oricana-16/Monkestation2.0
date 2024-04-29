@@ -75,6 +75,7 @@ There are several things that need to be remembered:
 
 /mob/living/carbon/human/update_worn_undersuit()
 	remove_overlay(UNIFORM_LAYER)
+	remove_overlay_rainbow_effect("uniform")
 
 	if(client && hud_used)
 		var/atom/movable/screen/inventory/inv = hud_used.inv_slots[TOBITSHIFT(ITEM_SLOT_ICLOTHING) + 1]
@@ -105,12 +106,16 @@ There are several things that need to be remembered:
 		if((dna?.species.bodytype & BODYTYPE_MONKEY) && (uniform.supports_variations_flags & CLOTHING_MONKEY_VARIATION))
 			icon_file = MONKEY_UNIFORM_FILE
 		else if((dna?.species.bodytype & BODYTYPE_DIGITIGRADE) && (uniform.supports_variations_flags & CLOTHING_DIGITIGRADE_VARIATION))
-			icon_file = DIGITIGRADE_UNIFORM_FILE
+			icon_file = uniform.worn_icon_digitigrade || DIGITIGRADE_UNIFORM_FILE
+			if(!(icon_exists(icon_file, RESOLVE_ICON_STATE(uniform)))) //if the digitigrade icon doesn't exist
+				var/species_icon_file = dna.species.generate_custom_worn_icon(LOADOUT_ITEM_UNIFORM, uniform)
+				if(species_icon_file)
+					icon_file = species_icon_file
 		//Female sprites have lower priority than digitigrade sprites
 		else if(dna.species.bodytype & BODYTYPE_CUSTOM)
 			icon_file = dna.species.generate_custom_worn_icon(LOADOUT_ITEM_UNIFORM, w_uniform)
 
-		else if(dna.species.sexes && (dna.species.bodytype & BODYTYPE_HUMANOID) && physique == FEMALE && !(uniform.female_sprite_flags & NO_FEMALE_UNIFORM)) //Agggggggghhhhh
+		else if(dna.species.visual_gender & dna.species.sexes && (dna.species.bodytype & BODYTYPE_HUMANOID) && physique == FEMALE && !(uniform.female_sprite_flags & NO_FEMALE_UNIFORM)) //Agggggggghhhhh
 			woman = TRUE
 
 		if(!icon_exists(icon_file, RESOLVE_ICON_STATE(uniform)))
@@ -124,12 +129,21 @@ There are several things that need to be remembered:
 			isinhands = FALSE,
 			female_uniform = woman ? uniform.female_sprite_flags : null,
 			override_state = target_overlay,
-			override_file = handled_by_bodytype ? icon_file : null,
+			override_file = handled_by_bodytype ? icon_file : null
 		)
 
 		if(OFFSET_UNIFORM in dna.species.offset_features)
 			uniform_overlay?.pixel_x += dna.species.offset_features[OFFSET_UNIFORM][1]
 			uniform_overlay?.pixel_y += dna.species.offset_features[OFFSET_UNIFORM][2]
+
+		if(HAS_TRAIT(uniform, TRAIT_RAINBOWED))
+			uniform_overlay.apply_rainbow_effect("uniform", src)
+			var/obj/effect/abstract/blank/rainbow_effect = new
+
+			uniform_overlay.appearance_flags &= ~KEEP_APART
+			uniform_overlay.appearance_flags |= KEEP_TOGETHER
+			uniform_overlay.vis_contents += rainbow_effect
+
 		overlays_standing[UNIFORM_LAYER] = uniform_overlay
 		apply_overlay(UNIFORM_LAYER)
 
@@ -324,11 +338,24 @@ There are several things that need to be remembered:
 		var/icon_file = DEFAULT_SHOES_FILE
 
 		var/mutant_override = FALSE
-		if(dna.species.bodytype & BODYTYPE_CUSTOM)
+		if((dna.species.bodytype & BODYTYPE_DIGITIGRADE) && (worn_item.supports_variations_flags & CLOTHING_DIGITIGRADE_VARIATION))
+			var/obj/item/bodypart/leg/leg = src.get_bodypart(BODY_ZONE_L_LEG)
+			if(leg.limb_id == leg.digitigrade_id) //make sure our legs are visually digitigrade
+				icon_file = shoes.worn_icon_digitigrade || DIGITIGRADE_SHOES_FILE
+				if(!(icon_exists(icon_file, RESOLVE_ICON_STATE(worn_item)))) //if the digitigrade icon doesn't exist
+					var/species_icon_file = dna.species.generate_custom_worn_icon(LOADOUT_ITEM_SHOES, shoes)
+					if(species_icon_file)
+						icon_file = species_icon_file
+				mutant_override = TRUE
+		else if(dna.species.bodytype & BODYTYPE_CUSTOM)
 			var/species_icon_file = dna.species.generate_custom_worn_icon(LOADOUT_ITEM_SHOES, shoes)
 			if(species_icon_file)
 				icon_file = species_icon_file
 				mutant_override = TRUE
+
+		if(!(icon_exists(icon_file, RESOLVE_ICON_STATE(worn_item))))
+			mutant_override = FALSE
+			icon_file = DEFAULT_SHOES_FILE
 
 		var/mutable_appearance/shoes_overlay = shoes.build_worn_icon(default_layer = SHOES_LAYER, default_icon_file = icon_file, override_file = mutant_override ? icon_file : null)
 		if(!shoes_overlay)
@@ -380,11 +407,21 @@ There are several things that need to be remembered:
 		var/icon_file = 'icons/mob/clothing/head/default.dmi'
 
 		var/mutant_override = FALSE
-		if(dna.species.bodytype & BODYTYPE_CUSTOM)
+
+		if(dna.species.bodytype & BODYTYPE_SNOUTED)
+			if(worn_item.supports_variations_flags & CLOTHING_SNOUTED_VARIATION)
+				if((icon_exists(head.worn_icon_snouted || SNOUTED_HEAD_FILE, RESOLVE_ICON_STATE(worn_item)))) //make sure the icon we're about to switch to exists
+					icon_file = head.worn_icon_snouted || SNOUTED_HEAD_FILE
+					mutant_override = TRUE
+		else if(dna.species.bodytype & BODYTYPE_CUSTOM)
 			var/species_icon_file = dna.species.generate_custom_worn_icon(LOADOUT_ITEM_HEAD, head)
 			if(species_icon_file)
 				icon_file = species_icon_file
 				mutant_override = TRUE
+
+		if(!(icon_exists(icon_file, RESOLVE_ICON_STATE(worn_item))))
+			mutant_override = FALSE
+			icon_file = 'icons/mob/clothing/head/default.dmi'
 
 		var/mutable_appearance/head_overlay = head.build_worn_icon(default_layer = HEAD_LAYER, default_icon_file = icon_file, override_file = mutant_override ? icon_file : null)
 		if(!mutant_override &&(OFFSET_HEAD in dna.species.offset_features))
@@ -439,13 +476,22 @@ There are several things that need to be remembered:
 		var/icon_file = DEFAULT_SUIT_FILE
 
 		var/mutant_override = FALSE
-		if(dna.species.bodytype & BODYTYPE_CUSTOM)
+		if((dna?.species.bodytype & BODYTYPE_DIGITIGRADE) && (wear_suit.supports_variations_flags & CLOTHING_DIGITIGRADE_VARIATION))
+			icon_file = wear_suit.worn_icon_digitigrade || DIGITIGRADE_SUIT_FILE
+			mutant_override = TRUE
+		else if(dna.species.bodytype & BODYTYPE_CUSTOM)
 			var/species_icon_file = dna.species.generate_custom_worn_icon(LOADOUT_ITEM_SUIT, wear_suit)
 			if(species_icon_file)
 				icon_file = species_icon_file
 				mutant_override = TRUE
 
+		if(!(icon_exists(icon_file, RESOLVE_ICON_STATE(worn_item))))
+			mutant_override = FALSE
+			icon_file = DEFAULT_SUIT_FILE
+
 		var/mutable_appearance/suit_overlay = wear_suit.build_worn_icon(default_layer = SUIT_LAYER, default_icon_file = icon_file, override_file = mutant_override ? icon_file : null)
+		if(!suit_overlay)
+			return
 		if(!mutant_override && (OFFSET_SUIT in dna.species.offset_features))
 			suit_overlay.pixel_x += dna.species.offset_features[OFFSET_SUIT][1]
 			suit_overlay.pixel_y += dna.species.offset_features[OFFSET_SUIT][2]
@@ -497,11 +543,19 @@ There are several things that need to be remembered:
 		var/icon_file = 'icons/mob/clothing/mask.dmi'
 
 		var/mutant_override = FALSE
-		if(dna.species.bodytype & BODYTYPE_CUSTOM)
+		if(dna.species.bodytype & BODYTYPE_SNOUTED)
+			if(worn_item.supports_variations_flags & CLOTHING_SNOUTED_VARIATION)
+				icon_file = wear_mask.worn_icon_snouted || SNOUTED_MASK_FILE
+				mutant_override = TRUE
+		else if(dna.species.bodytype & BODYTYPE_CUSTOM)
 			var/species_icon_file = dna.species.generate_custom_worn_icon(LOADOUT_ITEM_MASK, wear_mask)
 			if(species_icon_file)
 				icon_file = species_icon_file
 				mutant_override = TRUE
+
+		if(!(icon_exists(icon_file, RESOLVE_ICON_STATE(worn_item))))
+			icon_file = 'icons/mob/clothing/mask.dmi'
+			mutant_override = FALSE
 
 		var/mutable_appearance/mask_overlay = wear_mask.build_worn_icon(default_layer = FACEMASK_LAYER, default_icon_file = icon_file, override_file = mutant_override ? icon_file : null)
 		if(!mutant_override &&(OFFSET_FACEMASK in dna.species.offset_features))
@@ -550,12 +604,7 @@ There are several things that need to be remembered:
 		apply_overlay(LEGCUFF_LAYER)
 		throw_alert("legcuffed", /atom/movable/screen/alert/restrained/legcuffed, new_master = src.legcuffed)
 
-/mob/living/carbon/human/update_held_items()
-	remove_overlay(HANDS_LAYER)
-	if (handcuffed)
-		drop_all_held_items()
-		return
-
+/mob/living/carbon/human/get_held_overlays()
 	var/list/hands = list()
 	for(var/obj/item/worn_item in held_items)
 		if(client && hud_used && hud_used.hud_version != HUD_STYLE_NOHUD)
@@ -589,10 +638,7 @@ There are several things that need to be remembered:
 			hand_overlay.pixel_y += dna.species.offset_features[OFFSET_HANDS][2]
 
 		hands += hand_overlay
-
-
-	overlays_standing[HANDS_LAYER] = hands
-	apply_overlay(HANDS_LAYER)
+	return hands
 
 /proc/wear_female_version(t_color, icon, layer, type, greyscale_colors)
 	var/index = "[t_color]-[greyscale_colors]"
@@ -609,7 +655,6 @@ There are several things that need to be remembered:
 				continue
 			out += overlays_standing[i]
 	return out
-
 
 //human HUD updates for items in our inventory
 
@@ -726,6 +771,7 @@ generate/load female uniform sprites matching all previously decided variables
 	female_uniform = NO_FEMALE_UNIFORM,
 	override_state = null,
 	override_file = null,
+	use_height_offset = TRUE,
 )
 
 	//Find a valid icon_state from variables+arguments
@@ -754,7 +800,7 @@ generate/load female uniform sprites matching all previously decided variables
 	//eg: ammo counters, primed grenade flashes, etc.
 	var/list/worn_overlays = worn_overlays(standing, isinhands, file2use)
 	if(worn_overlays?.len)
-		if(!isinhands && default_layer && ishuman(loc))
+		if(!isinhands && default_layer && ishuman(loc) && use_height_offset)
 			var/mob/living/carbon/human/human_loc = loc
 			if(human_loc.get_mob_height() != HUMAN_HEIGHT_MEDIUM)
 				var/string_form_layer = num2text(default_layer)

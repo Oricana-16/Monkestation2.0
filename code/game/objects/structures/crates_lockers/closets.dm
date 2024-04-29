@@ -11,6 +11,7 @@
 	integrity_failure = 0.25
 	armor_type = /datum/armor/structure_closet
 	blocks_emissive = EMISSIVE_BLOCK_GENERIC
+	pass_flags_self = LETPASSCLICKS
 
 	/// The overlay for the closet's door
 	var/obj/effect/overlay/closet_door/door_obj
@@ -266,7 +267,10 @@
 		return TRUE
 	if(welded || locked)
 		return FALSE
-	if(strong_grab)
+	//MONKESTATION EDIT START - Allow a strong grabber to open their own pulled closet
+	//if(strong_grab) //MONKESTATION EDIT ORIGINAL
+	if(strong_grab && pulledby != user)
+		//MONKESTATION EDIT END
 		to_chat(user, span_danger("[pulledby] has an incredibly strong grip on [src], preventing it from opening."))
 		return FALSE
 	var/turf/T = get_turf(src)
@@ -722,16 +726,16 @@
 	else if(secure && broken)
 		balloon_alert(user, "broken!")
 
-/obj/structure/closet/emag_act(mob/user)
+/obj/structure/closet/emag_act(mob/user, obj/item/card/emag/emag_card)
 	if(secure && !broken)
-		if(user)
-			user.visible_message(span_warning("Sparks fly from [src]!"),
-							span_warning("You scramble [src]'s lock, breaking it open!"),
-							span_hear("You hear a faint electrical spark."))
+		visible_message(span_warning("Sparks fly from [src]!"), blind_message = span_hear("You hear a faint electrical spark."))
+		balloon_alert(user, "lock broken open")
 		playsound(src, SFX_SPARKS, 50, TRUE, SHORT_RANGE_SOUND_EXTRARANGE)
 		broken = TRUE
 		locked = FALSE
 		update_appearance()
+		return TRUE
+	return FALSE
 
 /obj/structure/closet/get_remote_view_fullscreens(mob/user)
 	if(user.stat == DEAD || !(user.sight & (SEEOBJS|SEEMOBS)))

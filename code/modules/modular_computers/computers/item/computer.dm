@@ -12,7 +12,7 @@ GLOBAL_LIST_EMPTY(TabletMessengers) // a list of all active messengers, similar 
 	integrity_failure = 0.5
 	max_integrity = 100
 	armor_type = /datum/armor/item_modular_computer
-	light_system = MOVABLE_LIGHT_DIRECTIONAL
+	light_system = OVERLAY_LIGHT_DIRECTIONAL
 
 	///The ID currently stored in the computer.
 	var/obj/item/card/id/computer_id_slot
@@ -143,14 +143,12 @@ GLOBAL_LIST_EMPTY(TabletMessengers) // a list of all active messengers, similar 
 /obj/item/modular_computer/proc/install_default_programs()
 	SHOULD_CALL_PARENT(FALSE)
 	for(var/programs in default_programs + starting_programs)
-		var/datum/computer_file/program/program_type = new programs
+		var/datum/computer_file/program_type = new programs
 		store_file(program_type)
 
 /obj/item/modular_computer/Destroy()
 	STOP_PROCESSING(SSobj, src)
-	wipe_program(forced = TRUE)
-	for(var/datum/computer_file/program/idle as anything in idle_threads)
-		idle.kill_program(TRUE)
+	close_all_programs()
 	//Some components will actually try and interact with this, so let's do it later
 	QDEL_NULL(soundloop)
 	QDEL_LIST(stored_files)
@@ -322,18 +320,22 @@ GLOBAL_LIST_EMPTY(TabletMessengers) // a list of all active messengers, similar 
 		if(response == "Yes")
 			turn_on(user)
 
-/obj/item/modular_computer/emag_act(mob/user, forced)
+/obj/item/modular_computer/emag_act(mob/user, obj/item/card/emag/emag_card, forced)
 	if(!enabled && !forced)
-		to_chat(user, span_warning("You'd need to turn the [src] on first."))
+		balloon_alert(user, "turn it on first!")
 		return FALSE
 	if(obj_flags & EMAGGED)
-		to_chat(user, span_notice("You swipe \the [src]. A console window fills the screen, but it quickly closes itself after only a few lines are written to it."))
+		balloon_alert(user, "already emagged!")
+		if (emag_card)
+			to_chat(user, span_notice("You swipe \the [src] with [emag_card]. A console window fills the screen, but it quickly closes itself after only a few lines are written to it."))
 		return FALSE
 
 	. = ..()
 	obj_flags |= EMAGGED
 	device_theme = PDA_THEME_SYNDICATE
-	to_chat(user, span_notice("You swipe \the [src]. A console window momentarily fills the screen, with white text rapidly scrolling past."))
+	balloon_alert(user, "syndieOS loaded")
+	if (emag_card)
+		to_chat(user, span_notice("You swipe \the [src] with [emag_card]. A console window momentarily fills the screen, with white text rapidly scrolling past."))
 	return TRUE
 
 /obj/item/modular_computer/examine(mob/user)
@@ -453,7 +455,7 @@ GLOBAL_LIST_EMPTY(TabletMessengers) // a list of all active messengers, similar 
 		enabled = TRUE
 		update_appearance()
 		if(open_ui)
-			ui_interact(user)
+			update_tablet_open_uis(user)
 		return TRUE
 	else // Unpowered
 		if(issynth)
@@ -476,20 +478,14 @@ GLOBAL_LIST_EMPTY(TabletMessengers) // a list of all active messengers, similar 
 		active_program.event_networkfailure(FALSE) // Active program requires NTNet to run but we've just lost connection. Crash.
 
 	for(var/datum/computer_file/program/idle_programs as anything in idle_threads)
-		if(idle_programs.program_state == PROGRAM_STATE_KILLED)
-			idle_threads.Remove(idle_programs)
-			continue
 		idle_programs.process_tick(seconds_per_tick)
 		idle_programs.ntnet_status = get_ntnet_status()
 		if(idle_programs.requires_ntnet && !idle_programs.ntnet_status)
 			idle_programs.event_networkfailure(TRUE)
 
 	if(active_program)
-		if(active_program.program_state == PROGRAM_STATE_KILLED)
-			active_program = null
-		else
-			active_program.process_tick(seconds_per_tick)
-			active_program.ntnet_status = get_ntnet_status()
+		active_program.process_tick(seconds_per_tick)
+		active_program.ntnet_status = get_ntnet_status()
 
 	handle_power(seconds_per_tick) // Handles all computer power interaction
 
@@ -571,23 +567,7 @@ GLOBAL_LIST_EMPTY(TabletMessengers) // a list of all active messengers, similar 
 	data["PC_showexitprogram"] = !!active_program // Hides "Exit Program" button on mainscreen
 	return data
 
-///Wipes the computer's current program. Doesn't handle any of the niceties around doing this
-/obj/item/modular_computer/proc/wipe_program(forced)
-	if(!active_program)
-		return
-	active_program.kill_program(forced)
-	active_program = null
-
-// Relays kill program request to currently active program. Use this to quit current program.
-/obj/item/modular_computer/proc/kill_program(forced = FALSE)
-	wipe_program(forced)
-	var/mob/user = usr
-	if(user && istype(user))
-		//Here to prevent programs sleeping in destroy
-		INVOKE_ASYNC(src, TYPE_PROC_REF(/datum, ui_interact), user) // Re-open the UI on this computer. It should show the main screen now.
-	update_appearance()
-
-/obj/item/modular_computer/proc/open_program(mob/user, datum/computer_file/program/program)
+/obj/item/modular_computer/proc/open_program(mob/user, datum/computer_file/program/program, open_ui = TRUE)
 	if(program.computer != src)
 		CRASH("tried to open program that does not belong to this computer")
 
@@ -597,11 +577,12 @@ GLOBAL_LIST_EMPTY(TabletMessengers) // a list of all active messengers, similar 
 
 	// The program is already running. Resume it.
 	if(program in idle_threads)
-		program.program_state = PROGRAM_STATE_ACTIVE
 		active_program = program
 		program.alert_pending = FALSE
 		idle_threads.Remove(program)
-		update_appearance()
+		if(open_ui)
+			update_tablet_open_uis(user)
+		update_appearance(UPDATE_ICON)
 		return TRUE
 
 	if(!program.is_supported_by_hardware(hardware_flag, 1, user))
@@ -620,8 +601,9 @@ GLOBAL_LIST_EMPTY(TabletMessengers) // a list of all active messengers, similar 
 
 	active_program = program
 	program.alert_pending = FALSE
-	update_appearance()
-	ui_interact(user)
+	if(open_ui)
+		update_tablet_open_uis(user)
+	update_appearance(UPDATE_ICON)
 	return TRUE
 
 // Returns 0 for No Signal, 1 for Low Signal and 2 for Good Signal. 3 is for wired connection (always-on)
@@ -653,10 +635,13 @@ GLOBAL_LIST_EMPTY(TabletMessengers) // a list of all active messengers, similar 
 
 	return SSmodular_computers.add_log("[src]: [text]")
 
-/obj/item/modular_computer/proc/shutdown_computer(loud = 1)
-	kill_program(forced = TRUE)
-	for(var/datum/computer_file/program/idle_program in idle_threads)
-		idle_program.kill_program(forced = TRUE)
+/obj/item/modular_computer/proc/close_all_programs()
+	active_program = null
+	for(var/datum/computer_file/program/idle as anything in idle_threads)
+		idle_threads.Remove(idle)
+
+/obj/item/modular_computer/proc/shutdown_computer(loud = TRUE)
+	close_all_programs()
 	if(looping_sound)
 		soundloop.stop()
 	if(physical && loud)
@@ -745,6 +730,11 @@ GLOBAL_LIST_EMPTY(TabletMessengers) // a list of all active messengers, similar 
 			return
 
 	if(istype(attacking_item, /obj/item/paper))
+		//MONKESTATION EDIT START
+		// Don't allow plastic cards (including the spare ID safe code biscuits!) to be inserted
+		if(istype(attacking_item, /obj/item/paper/paperslip/corporate))
+			return
+		//MONKESTATION EDIT END
 		if(stored_paper >= max_paper)
 			balloon_alert(user, "no more room!")
 			return

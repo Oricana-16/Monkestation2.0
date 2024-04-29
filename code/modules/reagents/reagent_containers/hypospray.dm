@@ -16,6 +16,8 @@
 	slot_flags = ITEM_SLOT_BELT
 	var/ignore_flags = NONE
 	var/infinite = FALSE
+	/// If TRUE, won't play a noise when injecting.
+	var/stealthy = FALSE
 
 /obj/item/reagent_containers/hypospray/attack_paw(mob/user, list/modifiers)
 	return attack_hand(user, modifiers)
@@ -41,6 +43,8 @@
 	if(reagents.total_volume && (ignore_flags || affected_mob.try_inject(user, injection_flags = INJECT_TRY_SHOW_ERROR_MESSAGE))) // Ignore flag should be checked first or there will be an error message.
 		to_chat(affected_mob, span_warning("You feel a tiny prick!"))
 		to_chat(user, span_notice("You inject [affected_mob] with [src]."))
+		if(!stealthy)
+			playsound(affected_mob, 'sound/items/hypospray.ogg', 50, TRUE)
 		var/fraction = min(amount_per_transfer_from_this/reagents.total_volume, 1)
 
 
@@ -255,7 +259,7 @@
 		return
 
 	to_chat(user,span_notice("You start manually releasing the low-pressure gauge..."))
-	if(!do_after(user, 0.5 SECONDS, affected_mob, interaction_key = DOAFTER_SOURCE_SURVIVALPEN))
+	if(!do_after(user, 10 SECONDS, affected_mob, interaction_key = DOAFTER_SOURCE_SURVIVALPEN))
 		return
 
 	amount_per_transfer_from_this = initial(amount_per_transfer_from_this) * 0.5
@@ -317,7 +321,7 @@
 	base_icon_state = "firstaid"
 	volume = 15
 	amount_per_transfer_from_this = 15
-	list_reagents = list(/datum/reagent/medicine/epinephrine = 12, /datum/reagent/medicine/coagulant = 2.5, /datum/reagent/medicine/spaceacillin = 0.5)
+	list_reagents = list(/datum/reagent/medicine/epinephrine = 12, /datum/reagent/medicine/coagulant = 2.5, /datum/reagent/medicine/antipathogenic/spaceacillin = 0.5)
 
 /obj/item/reagent_containers/hypospray/medipen/blood_loss
 	name = "hypovolemic-response autoinjector"

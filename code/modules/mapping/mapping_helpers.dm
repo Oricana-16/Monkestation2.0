@@ -110,21 +110,23 @@
 	layer = DOOR_HELPER_LAYER
 	late = TRUE
 
+/* replaced in monkestation\code\modules\mapping\mapping_helpers.dm
 /obj/effect/mapping_helpers/airlock/Initialize(mapload)
 	. = ..()
 	if(!mapload)
 		log_mapping("[src] spawned outside of mapload!")
 		return
 
-	var/obj/machinery/door/airlock/airlock = locate(/obj/machinery/door/airlock) in loc
+	var/obj/machinery/door/airlock/airlock = locate(/obj/machinery/door/airlock) in (offset_dir ?  get_step(src, offset_dir) : loc) //monkestation edit: adds offset_dir check
 	if(!airlock)
 		log_mapping("[src] failed to find an airlock at [AREACOORD(src)]")
 	else
 		payload(airlock)
+*/
 
 /obj/effect/mapping_helpers/airlock/LateInitialize()
 	. = ..()
-	var/obj/machinery/door/airlock/airlock = locate(/obj/machinery/door/airlock) in loc
+	var/obj/machinery/door/airlock/airlock = locate(/obj/machinery/door/airlock) in (offset_dir ?  get_step(src, offset_dir) : loc) //monkestation edit: adds offset_dir check
 	if(!airlock)
 		qdel(src)
 		return
@@ -257,18 +259,18 @@
 		log_mapping("[src] spawned outside of mapload!")
 		return INITIALIZE_HINT_QDEL
 
-	var/obj/machinery/power/apc/target = locate(/obj/machinery/power/apc) in loc
+	var/obj/machinery/power/apc/target = locate(/obj/machinery/power/apc) in (offset_dir ?  get_step(src, offset_dir) : loc) //monkestation edit: adds offset_dir check
 	if(isnull(target))
 		var/area/target_area = get_area(target)
 		log_mapping("[src] failed to find an apc at [AREACOORD(src)] ([target_area.type]).")
 	else
 		payload(target)
-	
+
 	return INITIALIZE_HINT_LATELOAD
 
 /obj/effect/mapping_helpers/apc/LateInitialize()
 	. = ..()
-	var/obj/machinery/power/apc/target = locate(/obj/machinery/power/apc) in loc
+	var/obj/machinery/power/apc/target = locate(/obj/machinery/power/apc) in (offset_dir ?  get_step(src, offset_dir) : loc) //monkestation edit: adds offset_dir check
 
 	if(isnull(target))
 		qdel(src)
@@ -408,7 +410,7 @@ INITIALIZE_IMMEDIATE(/obj/effect/mapping_helpers/no_lava)
 /obj/effect/mapping_helpers/atom_injector/LateInitialize()
 	if(!check_validity())
 		return
-	var/turf/target_turf = get_turf(src)
+	var/turf/target_turf = (offset_dir ?  get_turf(get_step(src, offset_dir)) : get_turf(src)) //monkestation edit: adds offset_dir check
 	var/matches_found = 0
 	for(var/atom/atom_on_turf as anything in target_turf.get_all_contents())
 		if(atom_on_turf == src)
@@ -651,8 +653,15 @@ INITIALIZE_IMMEDIATE(/obj/effect/mapping_helpers/no_lava)
 	name = "Dead Body placer"
 	late = TRUE
 	icon_state = "deadbodyplacer"
+	///if TRUE, was spawned out of mapload.
 	var/admin_spawned
-	var/bodycount = 2 //number of bodies to spawn
+	///number of bodies to spawn
+	var/bodycount = 3
+	/// These species IDs will be barred from spawning if morgue_cadaver_disable_nonhumans is disabled (In the future, we can also dehardcode this)
+	var/list/blacklisted_from_rng_placement = list(
+		SPECIES_ETHEREAL, // they revive on death which is bad juju
+		SPECIES_HUMAN,  // already have a 50% chance of being selected
+	)
 
 /obj/effect/mapping_helpers/dead_body_placer/Initialize(mapload)
 	. = ..()
@@ -661,23 +670,23 @@ INITIALIZE_IMMEDIATE(/obj/effect/mapping_helpers/no_lava)
 	admin_spawned = TRUE
 
 /obj/effect/mapping_helpers/dead_body_placer/LateInitialize()
-	var/area/a = get_area(src)
-	var/list/trays = list()
-	for (var/i in a.contents)
-		if (istype(i, /obj/structure/bodycontainer/morgue))
-			if(admin_spawned)
-				var/obj/structure/bodycontainer/morgue/early_morgue_tray = i
-				if(early_morgue_tray.connected.loc != early_morgue_tray)
-					continue
-			trays += i
-	if(!trays.len)
+	var/area/morgue_area = get_area(src)
+	var/list/obj/structure/bodycontainer/morgue/trays = list()
+	for(var/turf/area_turf as anything in morgue_area.get_contained_turfs())
+		var/obj/structure/bodycontainer/morgue/morgue_tray = locate() in area_turf
+		if(isnull(morgue_tray) || !morgue_tray.beeper || morgue_tray.connected.loc != morgue_tray)
+			continue
+		trays += morgue_tray
+
+	var/numtrays = length(trays)
+	if(numtrays == 0)
 		if(admin_spawned)
 			message_admins("[src] spawned at [ADMIN_VERBOSEJMP(src)] failed to find a closed morgue to spawn a body!")
 		else
 			log_mapping("[src] at [x],[y] could not find any morgues.")
 		return
 
-	var/reuse_trays = (trays.len < bodycount) //are we going to spawn more trays than bodies?
+	var/reuse_trays = (numtrays < bodycount) //are we going to spawn more trays than bodies?
 
 	var/use_species = !(CONFIG_GET(flag/morgue_cadaver_disable_nonhumans))
 	var/species_probability = CONFIG_GET(number/morgue_cadaver_other_species_probability)
@@ -686,35 +695,39 @@ INITIALIZE_IMMEDIATE(/obj/effect/mapping_helpers/no_lava)
 	if(use_species)
 		var/list/temp_list = get_selectable_species()
 		usable_races = temp_list.Copy()
-		usable_races -= SPECIES_ETHEREAL //they revive on death which is bad juju
-		LAZYREMOVE(usable_races, SPECIES_HUMAN)
-		if(!usable_races)
+		LAZYREMOVE(usable_races, blacklisted_from_rng_placement)
+		if(!LAZYLEN(usable_races))
 			notice("morgue_cadaver_disable_nonhumans. There are no valid roundstart nonhuman races enabled. Defaulting to humans only!")
 		if(override_species)
 			warning("morgue_cadaver_override_species BEING OVERRIDEN since morgue_cadaver_disable_nonhumans is disabled.")
 	else if(override_species)
-		usable_races += override_species
+		LAZYADD(usable_races, override_species)
 
-	for (var/i = 1 to bodycount)
+	var/guaranteed_human_spawned = FALSE
+	for (var/i in 1 to bodycount)
 		var/obj/structure/bodycontainer/morgue/morgue_tray = reuse_trays ? pick(trays) : pick_n_take(trays)
 		var/obj/structure/closet/body_bag/body_bag = new(morgue_tray.loc)
-		var/mob/living/carbon/human/new_human = new /mob/living/carbon/human(morgue_tray.loc, 1)
+		var/mob/living/carbon/human/new_human = new(morgue_tray.loc)
 
 		var/species_to_pick
-		if(LAZYLEN(usable_races))
-			if(!species_probability)
-				species_probability = 50
-				stack_trace("WARNING: morgue_cadaver_other_species_probability CONFIG SET TO 0% WHEN SPAWNING. DEFAULTING TO [species_probability]%.")
-			if(prob(species_probability))
-				species_to_pick = pick(usable_races)
-				var/datum/species/new_human_species = GLOB.species_list[species_to_pick]
-				if(new_human_species)
-					new_human.set_species(new_human_species)
-					new_human_species = new_human.dna.species
-					new_human_species.randomize_features(new_human)
-					new_human.fully_replace_character_name(new_human.real_name, new_human_species.random_name(new_human.gender, TRUE, TRUE))
-				else
-					stack_trace("failed to spawn cadaver with species ID [species_to_pick]") //if it's invalid they'll just be a human, so no need to worry too much aside from yelling at the server owner lol.
+
+		if(guaranteed_human_spawned && use_species)
+			if(LAZYLEN(usable_races))
+				if(!isnum(species_probability))
+					species_probability = 50
+					stack_trace("WARNING: morgue_cadaver_other_species_probability CONFIG SET TO 0% WHEN SPAWNING. DEFAULTING TO [species_probability]%.")
+				if(prob(species_probability))
+					species_to_pick = pick(usable_races)
+					var/datum/species/new_human_species = GLOB.species_list[species_to_pick]
+					if(new_human_species)
+						new_human.set_species(new_human_species)
+						new_human_species = new_human.dna.species
+						new_human_species.randomize_features(new_human)
+						new_human.fully_replace_character_name(new_human.real_name, new_human_species.random_name(new_human.gender, TRUE, TRUE))
+					else
+						stack_trace("failed to spawn cadaver with species ID [species_to_pick]") //if it's invalid they'll just be a human, so no need to worry too much aside from yelling at the server owner lol.
+		else
+			guaranteed_human_spawned = TRUE
 
 		body_bag.insert(new_human, TRUE)
 		body_bag.close()
@@ -722,17 +735,15 @@ INITIALIZE_IMMEDIATE(/obj/effect/mapping_helpers/no_lava)
 		body_bag.forceMove(morgue_tray)
 
 		new_human.death() //here lies the mans, rip in pepperoni.
-		for (var/part in new_human.organs) //randomly remove organs from each body, set those we keep to be in stasis
+		for (var/obj/item/organ/internal/part in new_human.organs) //randomly remove organs from each body, set those we keep to be in stasis
 			if (prob(40))
 				qdel(part)
 			else
-				var/obj/item/organ/O = part
-				O.organ_flags |= ORGAN_FROZEN
+				part.organ_flags |= ORGAN_FROZEN
 
 		morgue_tray.update_appearance()
 
 	qdel(src)
-
 
 //On Ian's birthday, the hop's office is decorated.
 /obj/effect/mapping_helpers/ianbirthday
@@ -848,7 +859,7 @@ INITIALIZE_IMMEDIATE(/obj/effect/mapping_helpers/no_lava)
 	var/note_path //if you already have something wrote up in a paper subtype, put the path here
 
 /obj/effect/mapping_helpers/airlock_note_placer/LateInitialize()
-	var/turf/turf = get_turf(src)
+	var/turf/turf = (offset_dir ?  get_turf(get_step(src, offset_dir)) : get_turf(src)) //monkestation edit: adds offset_dir check
 	if(note_path && !istype(note_path, /obj/item/paper)) //don't put non-paper in the paper slot thank you
 		log_mapping("[src] at [x],[y] had an improper note_path path, could not place paper note.")
 		qdel(src)
@@ -892,7 +903,7 @@ INITIALIZE_IMMEDIATE(/obj/effect/mapping_helpers/no_lava)
 	icon_state = "trapdoor"
 
 /obj/effect/mapping_helpers/trapdoor_placer/LateInitialize()
-	var/turf/component_target = get_turf(src)
+	var/turf/component_target = (offset_dir ?  get_turf(get_step(src, offset_dir)) : get_turf(src)) //monkestation edit: adds offset_dir check
 	component_target.AddComponent(/datum/component/trapdoor, starts_open = FALSE, conspicuous = FALSE)
 	qdel(src)
 
@@ -977,7 +988,7 @@ INITIALIZE_IMMEDIATE(/obj/effect/mapping_helpers/no_lava)
 	return INITIALIZE_HINT_LATELOAD
 
 /obj/effect/mapping_helpers/broken_floor/LateInitialize()
-	var/turf/open/floor/floor = get_turf(src)
+	var/turf/open/floor/floor = (offset_dir ?  get_turf(get_step(src, offset_dir)) : get_turf(src)) //monkestation edit: adds offset_dir check
 	floor.break_tile()
 	qdel(src)
 
@@ -993,6 +1004,6 @@ INITIALIZE_IMMEDIATE(/obj/effect/mapping_helpers/no_lava)
 	return INITIALIZE_HINT_LATELOAD
 
 /obj/effect/mapping_helpers/burnt_floor/LateInitialize()
-	var/turf/open/floor/floor = get_turf(src)
+	var/turf/open/floor/floor = (offset_dir ?  get_turf(get_step(src, offset_dir)) : get_turf(src)) //monkestation edit: adds offset_dir check
 	floor.burn_tile()
 	qdel(src)

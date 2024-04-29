@@ -66,10 +66,10 @@
 /datum/action/cooldown/create_button()
 	var/atom/movable/screen/movable/action_button/button = ..()
 	button.maptext = ""
-	button.maptext_x = 6
+	button.maptext_x = 4
 	button.maptext_y = 2
-	button.maptext_width = 24
-	button.maptext_height = 12
+	button.maptext_width = 32
+	button.maptext_height = 16
 	return button
 
 /datum/action/cooldown/update_button_status(atom/movable/screen/movable/action_button/button, force = FALSE)
@@ -79,9 +79,9 @@
 		button.maptext = ""
 	else
 		if (cooldown_rounding > 0)
-			button.maptext = MAPTEXT("<b>[round(time_left/10, cooldown_rounding)]</b>")
+			button.maptext = MAPTEXT_TINY_UNICODE("[round(time_left/10, cooldown_rounding)]")
 		else
-			button.maptext = MAPTEXT("<b>[round(time_left/10)]</b>")
+			button.maptext = MAPTEXT_TINY_UNICODE("[round(time_left/10)]")
 
 	if(!IsAvailable() || !is_action_active(button))
 		return
@@ -177,6 +177,8 @@
 /// Starts a cooldown time for other abilities that share a cooldown with this. Has some niche usage with more complicated attack ai!
 /// Will use default cooldown time if an override is not specified
 /datum/action/cooldown/proc/StartCooldownOthers(override_cooldown_time)
+	if(!length(owner.actions))
+		return // Possible if they have an action they don't control
 	for(var/datum/action/cooldown/shared_ability in owner.actions - src)
 		if(!(shared_cooldown & shared_ability.shared_cooldown))
 			continue

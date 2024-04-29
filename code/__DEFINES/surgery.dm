@@ -15,6 +15,8 @@
 #define ORGAN_UNREMOVABLE (1<<6)
 /// Can't be seen by scanners, doesn't anger body purists
 #define ORGAN_HIDDEN (1<<7)
+/// Synthetic organ granted by a species (for use for organ replacements between species)
+#define ORGAN_SYNTHETIC_FROM_SPECIES (1<<8)
 
 // Flags for the bodypart_flags var on /obj/item/bodypart
 /// Bodypart cannot be dismembered or amputated
@@ -42,3 +44,8 @@
 #define SURGERY_REQUIRE_LIMB (1<<3)
 ///Will allow the surgery to work only if there's a real (eg. not pseudopart) limb.
 #define SURGERY_REQUIRES_REAL_LIMB (1<<4)
+///Will grant a bonus during surgery steps to users with TRAIT_MORBID while they're using tools with CRUEL_IMPLEMENT
+#define SURGERY_MORBID_CURIOSITY (1<<5)
+
+///Return true if target is not in a valid body position for the surgery
+#define IS_IN_INVALID_SURGICAL_POSITION(target, surgery) ((surgery.surgery_flags & SURGERY_REQUIRE_RESTING) && (target.mobility_flags & MOBILITY_LIEDOWN && target.body_position != LYING_DOWN))

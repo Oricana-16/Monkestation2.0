@@ -14,6 +14,9 @@
 		mind.active = TRUE
 		mind.set_current(src)
 
+	if((client.player_age != -1) && client.player_age <= CONFIG_GET(number/minimum_age) && !(client.ckey in GLOB.interviews.approved_ckeys))
+		client.interviewee = TRUE
+
 	// Check if user should be added to interview queue
 	if (!client.holder && CONFIG_GET(flag/panic_bunker) && CONFIG_GET(flag/panic_bunker_interview) && !(client.ckey in GLOB.interviews.approved_ckeys))
 		var/required_living_minutes = CONFIG_GET(number/panic_bunker_living)
@@ -69,5 +72,4 @@
 		to_chat(src, "Please set up your character and select \"Ready\". The game will start [tl > 0 ? "in about [DisplayTimeText(tl)]" : "soon"].")
 
 
-	spawn(4 SECONDS)
-		client.playtitlemusic()
+	addtimer(CALLBACK(client, TYPE_PROC_REF(/client, playtitlemusic)), 4 SECONDS, TIMER_DELETE_ME)

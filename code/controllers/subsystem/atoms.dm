@@ -138,7 +138,7 @@ SUBSYSTEM_DEF(atoms)
 
 	switch(result)
 		if (INITIALIZE_HINT_NORMAL)
-			// pass
+			EMPTY_BLOCK_GUARD // Pass
 		if(INITIALIZE_HINT_LATELOAD)
 			if(arguments[1]) //mapload
 				late_loaders += A
@@ -156,7 +156,8 @@ SUBSYSTEM_DEF(atoms)
 		BadInitializeCalls[the_type] |= BAD_INIT_DIDNT_INIT
 	else
 		SEND_SIGNAL(A, COMSIG_ATOM_AFTER_SUCCESSFUL_INITIALIZE)
-		var/atom/movable/location = A.loc
+		SEND_GLOBAL_SIGNAL(COMSIG_GLOB_ATOM_AFTER_POST_INIT, A)
+		var/atom/location = A.loc
 		if(location)
 			/// Sends a signal that the new atom `src`, has been created at `loc`
 			SEND_SIGNAL(location, COMSIG_ATOM_AFTER_SUCCESSFUL_INITIALIZED_ON, A, arguments[1])
@@ -192,6 +193,10 @@ SUBSYSTEM_DEF(atoms)
 		base_initialized = INITIALIZATION_INNEW_REGULAR
 		return
 	initialized = initialized_state[length(initialized_state)][2]
+
+/// Returns TRUE if anything is currently being initialized
+/datum/controller/subsystem/atoms/proc/initializing_something()
+	return length(initialized_state) > 1
 
 /datum/controller/subsystem/atoms/Recover()
 	initialized = SSatoms.initialized

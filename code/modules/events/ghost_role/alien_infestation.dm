@@ -5,12 +5,12 @@
 
 	min_players = 35 //monkie edit: 10 to 35 (tg what the fuck)
 
-	earliest_start = 90 MINUTES //monkie edit: 20 to 90
-	dynamic_should_hijack = TRUE
+	earliest_start = 60 MINUTES //monkie edit: 20 to 90
+	//dynamic_should_hijack = TRUE
 	category = EVENT_CATEGORY_ENTITIES
 	description = "A xenomorph larva spawns on a random vent."
 
-/datum/round_event_control/alien_infestation/can_spawn_event(players_amt, allow_magic = FALSE)
+/datum/round_event_control/alien_infestation/can_spawn_event(players_amt, allow_magic = FALSE, fake_check = FALSE) //MONKESTATION ADDITION: fake_check = FALSE
 	. = ..()
 	if(!.)
 		return .
@@ -34,7 +34,7 @@
 	announce_when = rand(announce_when, announce_when + 50)
 	if(prob(50))
 		spawncount++
-
+	setup = TRUE //MONKESTATION ADDITION
 /datum/round_event/ghost_role/alien_infestation/announce(fake)
 	var/living_aliens = FALSE
 	for(var/mob/living/carbon/alien/A in GLOB.player_list)
@@ -63,12 +63,12 @@
 		message_admins("An event attempted to spawn an alien but no suitable vents were found. Shutting down.")
 		return MAP_ERROR
 
-	var/list/candidates = get_candidates(ROLE_ALIEN, ROLE_ALIEN)
+	var/list/candidates = SSpolling.poll_ghost_candidates(check_jobban = ROLE_ALIEN, role = ROLE_ALIEN, pic_source = /mob/living/carbon/alien/larva, role_name_text = role_name)
 
-	if(!candidates.len)
+	if(!length(candidates))
 		return NOT_ENOUGH_PLAYERS
 
-	while(spawncount > 0 && vents.len && candidates.len)
+	while(spawncount > 0 && vents.len && length(candidates))
 		var/obj/vent = pick_n_take(vents)
 		var/mob/dead/observer/selected = pick_n_take(candidates)
 		var/mob/living/carbon/alien/larva/new_xeno = new(vent.loc)

@@ -122,6 +122,9 @@
 
 /obj/effect/abstract/liquid_turf/proc/movable_entered(datum/source, atom/movable/AM)
 	SIGNAL_HANDLER
+	if(!liquid_group)
+		qdel(src)
+		return
 
 	var/turf/T = source
 	if(isobserver(AM))
@@ -143,8 +146,9 @@
 			liquid_group.expose_atom(stepped_human, 1, TOUCH)
 	else if (isliving(AM))
 		var/mob/living/L = AM
-		if(prob(7) && !(L.movement_type & FLYING) && L.body_position == STANDING_UP)
-			L.slip(30, T, NO_SLIP_WHEN_WALKING, 0, TRUE)
+		if(liquid_group.slippery)
+			if(prob(7) && !(L.movement_type & FLYING) && L.body_position == STANDING_UP)
+				L.slip(30, T, NO_SLIP_WHEN_WALKING, 0, TRUE)
 
 	if(fire_state)
 		AM.fire_act((T20C+50) + (50*fire_state), 125)
@@ -194,7 +198,7 @@
 	my_turf = loc
 	RegisterSignal(my_turf, COMSIG_ATOM_ENTERED, PROC_REF(movable_entered))
 	RegisterSignal(my_turf, COMSIG_TURF_MOB_FALL, PROC_REF(mob_fall))
-	RegisterSignal(my_turf, COMSIG_PARENT_EXAMINE, PROC_REF(examine_turf))
+	RegisterSignal(my_turf, COMSIG_ATOM_EXAMINE, PROC_REF(examine_turf))
 
 	SEND_SIGNAL(my_turf, COMSIG_TURF_LIQUIDS_CREATION, src)
 
@@ -204,7 +208,7 @@
 
 
 /obj/effect/abstract/liquid_turf/Destroy(force)
-	UnregisterSignal(my_turf, list(COMSIG_ATOM_ENTERED, COMSIG_TURF_MOB_FALL, COMSIG_PARENT_EXAMINE))
+	UnregisterSignal(my_turf, list(COMSIG_ATOM_ENTERED, COMSIG_TURF_MOB_FALL, COMSIG_ATOM_EXAMINE))
 	if(liquid_group)
 		liquid_group.remove_from_group(my_turf)
 	if(my_turf in SSliquids.evaporation_queue)
@@ -233,7 +237,7 @@
 	RegisterSignal(my_turf, COMSIG_TURF_MOB_FALL, PROC_REF(mob_fall))
 
 /**
- * Handles COMSIG_PARENT_EXAMINE for the turf.
+ * Handles COMSIG_ATOM_EXAMINE for the turf.
  *
  * Adds reagent info to examine text.
  * Arguments:
@@ -243,6 +247,10 @@
  *  */
 /obj/effect/abstract/liquid_turf/proc/examine_turf(turf/source, mob/examiner, list/examine_list)
 	SIGNAL_HANDLER
+
+	if(!liquid_group)
+		qdel(src)
+		return
 
 	// This should always have reagents if this effect object exists, but as a sanity check...
 	if(!length(liquid_group.reagents.reagent_list))
@@ -268,6 +276,8 @@
 
 			for(var/datum/reagent/reagent_type as anything in liquid_group.reagents.reagent_list)
 				var/reagent_name = initial(reagent_type.name)
+				if(istype(reagent_type, /datum/reagent/ammonia/urine) && examiner.client?.prefs.read_preference(/datum/preference/toggle/prude_mode))
+					reagent_name = "Ammonia"
 				var/volume = round(reagent_type.volume / length(liquid_group.members), 0.01)
 				examine_list += "&bull; [volume] units of [reagent_name]"
 

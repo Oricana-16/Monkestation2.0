@@ -47,6 +47,7 @@
 			// We found something, we can just return now
 			picked_machine_ref = WEAKREF(sick_device)
 			return
+	setup = TRUE //MONKESTATION ADDITION
 
 /datum/round_event/radiation_leak/announce(fake)
 	var/obj/machinery/the_source_of_our_problems = picked_machine_ref?.resolve()
@@ -60,7 +61,7 @@
 
 	priority_announce("A radiation leak has been detected in [location_descriptor || "an unknown area"]. \
 		All crew are to evacuate the affected area. Our [pick("mechanics", "engineers", "scientists", "interns", "sensors", "readings")] \
-		report that a machine within is causing it - repair it quickly to stop the leak.")
+		report that a machine within is causing it - repair it quickly to stop the leak.", "[command_name()] Engineering Division")
 
 /datum/round_event/radiation_leak/start()
 	var/obj/machinery/the_source_of_our_problems = picked_machine_ref?.resolve()

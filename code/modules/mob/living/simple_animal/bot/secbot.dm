@@ -81,8 +81,7 @@
 
 /mob/living/simple_animal/bot/secbot/beepsky/jr/Initialize(mapload)
 	. = ..()
-	resize = 0.8
-	update_transform()
+	update_transform(0.8)
 
 /mob/living/simple_animal/bot/secbot/pingsky
 	name = "Officer Pingsky"
@@ -235,12 +234,12 @@
 		retaliate(user)
 		special_retaliate_after_attack(user)
 
-/mob/living/simple_animal/bot/secbot/emag_act(mob/user)
-	..()
+/mob/living/simple_animal/bot/secbot/emag_act(mob/user, obj/item/card/emag/emag_card)
+	. = ..()
 	if(!(bot_cover_flags & BOT_COVER_EMAGGED))
 		return
 	if(user)
-		to_chat(user, span_danger("You short out [src]'s target assessment circuits."))
+		balloon_alert(user, "target assessment circuits shorted")
 		oldtarget_name = user.name
 
 	if(bot_type == HONK_BOT)
@@ -251,13 +250,17 @@
 
 	security_mode_flags &= ~SECBOT_DECLARE_ARRESTS
 	update_appearance()
+	return TRUE
 
 /mob/living/simple_animal/bot/secbot/bullet_act(obj/projectile/Proj)
+	. = ..()
+	if(. != BULLET_ACT_HIT)
+		return
+
 	if(istype(Proj, /obj/projectile/beam) || istype(Proj, /obj/projectile/bullet))
 		if((Proj.damage_type == BURN) || (Proj.damage_type == BRUTE))
 			if(Proj.is_hostile_projectile() && Proj.damage < src.health && ishuman(Proj.firer))
 				retaliate(Proj.firer)
-	return ..()
 
 /mob/living/simple_animal/bot/secbot/UnarmedAttack(atom/attack_target, proximity_flag)
 	if(!(bot_mode_flags & BOT_MODE_ON))

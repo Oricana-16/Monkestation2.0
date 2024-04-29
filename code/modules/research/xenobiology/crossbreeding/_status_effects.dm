@@ -470,10 +470,8 @@
 	colour = "grey"
 
 /datum/status_effect/stabilized/grey/tick()
-	for(var/mob/living/simple_animal/slime/S in range(1, get_turf(owner)))
-		if(!(owner in S.Friends))
-			to_chat(owner, span_notice("[linked_extract] pulses gently as it communicates with [S]."))
-			S.set_friendship(owner, 1)
+	for(var/mob/living/basic/slime/new_friend in range(3, get_turf(owner)))
+		SEND_SIGNAL(new_friend, COMSIG_FRIENDSHIP_CHANGE, owner, 1)
 	return ..()
 
 /datum/status_effect/stabilized/orange
@@ -989,7 +987,7 @@
 		healing_types += CLONE
 
 	if(length(healing_types))
-		owner.apply_damage_type(-heal_amount, damagetype = pick(healing_types))
+		owner.heal_damage_type(heal_amount, damagetype = pick(healing_types))
 
 	owner.adjust_nutrition(3)
 	drained.adjustCloneLoss(heal_amount * DRAIN_DAMAGE_MULTIPLIER)

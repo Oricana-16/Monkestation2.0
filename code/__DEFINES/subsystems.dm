@@ -20,7 +20,7 @@
  *
  * make sure you add an update to the schema_version stable in the db changelog
  */
-#define DB_MINOR_VERSION 23
+#define DB_MINOR_VERSION 24
 
 
 //! ## Timing subsystem
@@ -133,6 +133,7 @@
 #define INIT_ORDER_DBCORE 95
 #define INIT_ORDER_BLACKBOX 94
 #define INIT_ORDER_SERVER_MAINT 93
+#define INIT_ORDER_METRICS 91
 #define INIT_ORDER_INPUT 85
 #define INIT_ORDER_SOUNDS 83
 #define INIT_ORDER_INSTRUMENTS 82
@@ -165,6 +166,7 @@
 #define INIT_ORDER_LANGUAGE 25
 #define INIT_ORDER_MACHINES 20
 #define INIT_ORDER_SKILLS 15
+#define INIT_ORDER_PATHOGEN 14
 #define INIT_ORDER_TIMER 1
 #define INIT_ORDER_DEFAULT 0
 #define INIT_ORDER_AIR -1
@@ -183,6 +185,7 @@
 #define INIT_ORDER_MINOR_MAPPING -40
 #define INIT_ORDER_PATH -50
 #define INIT_ORDER_EXPLOSIONS -69
+#define INIT_ORDER_REPLAYS -94
 #define INIT_ORDER_HOTSPOTS -95 ///only called on oshan so just call it near the end.
 #define INIT_ORDER_TWITCH -96
 #define INIT_ORDER_STATPANELS -97
@@ -210,11 +213,13 @@
 #define FIRE_PRIORITY_NPC_ACTIONS 22
 #define FIRE_PRIORITY_PATHFINDING 23
 #define FIRE_PRIORITY_CLIFF_FALLING 24
+#define FIRE_PRIORITY_MOVABLE_PHYSICS 24
 #define FIRE_PRIORITY_PROCESS 25
 #define FIRE_PRIORITY_THROWING 25
 #define FIRE_PRIORITY_REAGENTS 26
 #define FIRE_PRIORITY_SPACEDRIFT 30
 #define FIRE_PRIORITY_HOTSPOT 30
+#define FIRE_PRIORITY_PATHOGEN 31
 #define FIRE_PRIORITY_SMOOTHING 35
 #define FIRE_PRIORITY_OBJ 40
 #define FIRE_PRIORITY_ACID 40
@@ -261,6 +266,14 @@
 #define GAME_STATE_PLAYING 3
 /// Game has round finished
 #define GAME_STATE_FINISHED 4
+
+// Used for SSticker.force_ending
+/// Default, round is not being forced to end.
+#define END_ROUND_AS_NORMAL 0
+/// End the round now as normal
+#define FORCE_END_ROUND 1
+/// For admin forcing roundend, can be used to distinguish the two
+#define ADMIN_FORCE_END_ROUND 2
 
 /**
 	Create a new timer and add it to the queue.
@@ -317,6 +330,9 @@
 #define SSMOBS_DT (SSmobs.wait/10)
 #define SSOBJ_DT (SSobj.wait/10)
 
+// The change in the world's time from the subsystem's last fire in seconds.
+#define DELTA_WORLD_TIME(ss) ((world.time - ss.last_fire) * 0.1)
+
 /// The timer key used to know how long subsystem initialization takes
 #define SS_INIT_TIMER_KEY "ss_init"
 
@@ -334,3 +350,4 @@
 #define SSLIQUIDS_RUN_TYPE_FIRE 5
 #define SSLIQUIDS_RUN_TYPE_OCEAN 6
 #define SSLIQUIDS_RUN_TYPE_TEMPERATURE 7
+#define SSLIQUIDS_RUN_TYPE_CACHED_EDGES 8

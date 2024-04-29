@@ -24,6 +24,7 @@
 	. = ..()
 	var/random_icon = pick("crab_red","crab_blue")
 	icon_state = random_icon
+	icon_living = random_icon
 	icon_dead = "[random_icon]_dead"
 	gold_core_spawnable = NO_SPAWN
 
@@ -48,11 +49,14 @@
 	icon_gib = null
 	gold_core_spawnable = NO_SPAWN
 	ai_controller = /datum/ai_controller/basic_controller/
+	basic_mob_flags = FLIP_ON_DEATH
+
 /mob/living/basic/lizard/snake
 	name = "Three Headed Snake"
 	desc = "This little fella looks familiar..."
 	icon = 'monkestation/code/modules/donator/icons/mob/pets.dmi'
 	icon_state = "triple_snake"
+	icon_living = "triple_snake"
 	gold_core_spawnable = NO_SPAWN
 
 /mob/living/basic/pet/dog/germanshepherd
@@ -60,6 +64,8 @@
 	desc = "He's so cool, he's got sunglasses!!"
 	icon = 'monkestation/code/modules/donator/icons/mob/pets.dmi'
 	icon_state = "germanshepherd"
+	icon_living = "germanshepherd"
+	icon_dead = "germanshepherd_dead"
 	icon_gib = null
 	can_be_held = FALSE // as funny as this would be, a german shepherd is way too big to carry with one hand
 	gold_core_spawnable = NO_SPAWN
@@ -69,6 +75,8 @@
 	desc = "He's got a lot to say!"
 	icon = 'monkestation/code/modules/donator/icons/mob/pets.dmi'
 	icon_state = "slime"
+	icon_living = "slime"
+	icon_dead = "slime_dead"
 	gold_core_spawnable = NO_SPAWN
 	initial_language_holder = /datum/language_holder/slime
 	ai_controller = /datum/ai_controller/basic_controller/
@@ -84,7 +92,7 @@
 
 /mob/living/basic/pet/slime/talkative/attack_hand(mob/living/carbon/human/user, list/modifiers)
 	. = ..()
-	if(src.stat != CONSCIOUS || (user.istate & ISTATE_HARM) || LAZYACCESS(modifiers, RIGHT_CLICK))
+	if(user == src || src.stat != CONSCIOUS || (user.istate & ISTATE_HARM) || LAZYACCESS(modifiers, RIGHT_CLICK))
 		return
 
 	new /obj/effect/temp_visual/heart(src.loc)
@@ -100,5 +108,42 @@
 	desc = "Look at him go!"
 	icon = 'monkestation/code/modules/donator/icons/mob/pets.dmi'
 	icon_state = "spider"
+	icon_living = "spider"
+	icon_dead = "spider_dead"
 	gold_core_spawnable = NO_SPAWN
 	ai_controller = /datum/ai_controller/basic_controller/
+
+/mob/living/basic/butterfly/void
+	name = "Void Butterfly"
+	desc = "They say if a void butterfly flaps its wings..."
+	icon = 'monkestation/code/modules/donator/icons/mob/pets.dmi'
+	icon_state = "void_butterfly"
+	icon_living = "void_butterfly"
+	icon_dead = "void_butterfly_dead"
+	gold_core_spawnable = NO_SPAWN
+	health = 20
+	maxHealth = 20
+
+/mob/living/basic/butterfly/void/spacial
+	fixed_color = TRUE
+
+/mob/living/basic/crab/plant
+	name = "Plant crab"
+	desc = "Is it a crab made of plant or a plant made of crab?"
+	icon = 'monkestation/code/modules/donator/icons/mob/pets.dmi'
+	icon_state = "crab_plant"
+	icon_living = "crab_plant"
+	icon_dead = "crab_plant_dead"
+	gold_core_spawnable = NO_SPAWN
+
+/mob/living/basic/pet/quilmaid
+	name = "\improper Quil' Maid"
+	desc = "Someone dressed up this Space-e-mon in a maid outfit."
+	icon = 'monkestation/code/modules/donator/icons/mob/pets.dmi'
+	icon_state = "quil_maid"
+	icon_living = "quil_maid"
+	icon_dead = "quil_maid"
+	icon_gib = null
+	gold_core_spawnable = NO_SPAWN
+	ai_controller = /datum/ai_controller/basic_controller/
+

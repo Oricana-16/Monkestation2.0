@@ -10,6 +10,8 @@
 
 Difficulty: Hard
 
+Warning the icebox version is being overridden in monkestation/code/modules/mob/living/simple_animal/megafauna/wendigo.dm
+
 */
 
 /mob/living/simple_animal/hostile/megafauna/wendigo
@@ -57,13 +59,13 @@ Difficulty: Hard
 	/// Saves the turf the megafauna was created at (spawns exit portal here)
 	var/turf/starting
 	/// Range for wendigo stomping when it moves
-	var/stomp_range = 0
+	var/stomp_range = 1
 	/// Stores directions the mob is moving, then calls that a move has fully ended when these directions are removed in moved
 	var/stored_move_dirs = 0
 	/// If the wendigo is allowed to move
 	var/can_move = TRUE
 	/// Time before the wendigo can scream again
-	var/scream_cooldown_time = 5 SECONDS
+	var/scream_cooldown_time = 10 SECONDS
 	/// Stores the last scream time so it doesn't spam it
 	COOLDOWN_DECLARE(scream_cooldown)
 
@@ -206,8 +208,9 @@ Difficulty: Hard
 	COOLDOWN_START(src, scream_cooldown, scream_cooldown_time)
 	SLEEP_CHECK_DEATH(5, src)
 	playsound(loc, 'sound/magic/demon_dies.ogg', 600, FALSE, 10)
-	animate(src, pixel_z = rand(5, 15), time = 1, loop = 20)
-	animate(pixel_z = 0, time = 1)
+	var/pixel_shift = rand(5, 15)
+	animate(src, pixel_z = pixel_shift, time = 1, loop = 20, flags = ANIMATION_RELATIVE)
+	animate(pixel_z = -pixel_shift, time = 1, flags = ANIMATION_RELATIVE)
 	for(var/mob/living/dizzy_target in get_hearers_in_view(7, src) - src)
 		dizzy_target.set_dizzy_if_lower(12 SECONDS)
 		to_chat(dizzy_target, span_danger("The wendigo screams loudly!"))

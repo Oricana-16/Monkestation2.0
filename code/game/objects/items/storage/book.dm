@@ -77,9 +77,11 @@ GLOBAL_LIST_INIT(bibleitemstates, list("bible", "koran", "scrapbook", "burning",
 		if("honk1")
 			user.dna.add_mutation(/datum/mutation/human/clumsy)
 			user.equip_to_slot_or_del(new /obj/item/clothing/mask/gas/clown_hat(user), ITEM_SLOT_MASK)
+			AddComponent(/datum/component/slippery, 40) //Same as a synthesized banana peel.
 		if("honk2")
 			user.dna.add_mutation(/datum/mutation/human/clumsy)
 			user.equip_to_slot_or_del(new /obj/item/clothing/mask/gas/clown_hat(user), ITEM_SLOT_MASK)
+			AddComponent(/datum/component/slippery, 40) //Same as a synthesized banana peel.
 		if("insuls")
 			var/obj/item/clothing/gloves/color/fyellow/insuls = new
 			insuls.name = "insuls"
@@ -235,7 +237,7 @@ GLOBAL_LIST_INIT(bibleitemstates, list("bible", "koran", "scrapbook", "burning",
 			playsound(src,'sound/effects/pray_chaplain.ogg',60,TRUE)
 			for(var/obj/item/soulstone/SS in sword.contents)
 				SS.required_role = null
-				for(var/mob/living/simple_animal/shade/EX in SS)
+				for(var/mob/living/basic/shade/EX in SS)
 					var/datum/antagonist/cult/cultist = EX.mind.has_antag_datum(/datum/antagonist/cult)
 					if (cultist)
 						cultist.silent = TRUE

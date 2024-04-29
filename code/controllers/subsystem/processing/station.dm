@@ -60,9 +60,9 @@ PROCESSING_SUBSYSTEM_DEF(station)
 			continue //Dont add abstract ones to it
 		selectable_traits_by_types[initial(trait_typepath.trait_type)][trait_typepath] = initial(trait_typepath.weight)
 
-	var/positive_trait_count = pick(20;0, 5;1, 1;2)
-	var/neutral_trait_count = pick(10;0, 10;1, 3;2)
-	var/negative_trait_count = pick(20;0, 5;1, 1;2)
+	var/positive_trait_count = pick(4;0, 3;1, 2;2, 1;3)
+	var/neutral_trait_count = pick(3;0, 6;1, 3;2, 1;3)
+	var/negative_trait_count = pick(4;0, 3;1, 2;2, 1;3)
 
 	pick_traits(STATION_TRAIT_POSITIVE, positive_trait_count)
 	pick_traits(STATION_TRAIT_NEUTRAL, neutral_trait_count)
@@ -76,6 +76,9 @@ PROCESSING_SUBSYSTEM_DEF(station)
 	for(var/iterator in 1 to amount)
 		var/datum/station_trait/trait_type = pick_weight(selectable_traits_by_types[trait_sign]) //Rolls from the table for the specific trait type
 		selectable_traits_by_types[trait_sign] -= trait_type
+		if(istype(trait_type, /datum/station_trait/late_arrivals) && SSmapping.config.map_name == "Oshan Station")
+			amount++
+			continue
 		setup_trait(trait_type)
 
 ///Creates a given trait of a specific type, while also removing any blacklisted ones from the future pool.

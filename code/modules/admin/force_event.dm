@@ -1,4 +1,5 @@
 ///Allows an admin to force an event
+/*
 /client/proc/forceEvent()
 	set name = "Trigger Event"
 	set category = "Admin.Events"
@@ -15,7 +16,7 @@
 
 	var/datum/force_event/ui = new(usr)
 	ui.ui_interact(usr)
-
+*/
 /// Force Event Panel
 /datum/force_event
 
@@ -95,6 +96,6 @@
 						return
 			var/always_announce_chance = 100
 			var/no_announce_chance = 0
-			event.runEvent(announce_chance_override = announce_event ? always_announce_chance : no_announce_chance, admin_forced = TRUE)
+			event.run_event(announce_chance_override = announce_event ? always_announce_chance : no_announce_chance, admin_forced = TRUE)
 			message_admins("[key_name_admin(usr)] has triggered an event. ([event.name])")
 			log_admin("[key_name(usr)] has triggered an event. ([event.name])")

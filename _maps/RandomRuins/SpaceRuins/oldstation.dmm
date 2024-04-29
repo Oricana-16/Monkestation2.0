@@ -5278,7 +5278,7 @@
 /area/ruin/space/ancientstation/charlie/hall)
 "we" = (
 /obj/machinery/light/small/directional/north,
-/obj/machinery/modular_computer/console/preset/engineering,
+/obj/machinery/modular_computer/preset/engineering,
 /turf/open/floor/engine/airless,
 /area/ruin/space/ancientstation/beta/supermatter)
 "wg" = (
@@ -7926,7 +7926,6 @@
 /obj/structure/closet/crate/secure/science{
 	req_access = list("away_science")
 	},
-/obj/item/relic,
 /obj/item/transfer_valve,
 /obj/item/raw_anomaly_core/bluespace,
 /obj/item/raw_anomaly_core/random,

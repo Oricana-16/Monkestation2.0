@@ -515,7 +515,7 @@
 	"duration": 1340,
 	"artist": "Leslie Fish",
 	"secret": false,
-	"lobby": true,
+	"lobby": false,
 	"jukebox": true,
 	"genre": "Folk and Indie"
 	},
@@ -525,7 +525,7 @@
 	"duration": 2660,
 	"artist": "Duane Elms",
 	"secret": false,
-	"lobby": true,
+	"lobby": false,
 	"jukebox": true,
 	"genre": "Folk and Indie"
 	},
@@ -535,7 +535,7 @@
 	"duration": 1700,
 	"artist": "Leslie Fish",
 	"secret": false,
-	"lobby": true,
+	"lobby": false,
 	"jukebox": true,
 	"genre": "Folk and Indie"
 	},
@@ -2255,7 +2255,7 @@
 	"duration": 3180,
 	"artist": "David Bowie",
 	"secret": false,
-	"lobby": true,
+	"lobby": false,
 	"jukebox": true,
 	"genre": "Rock"
 	},
@@ -2285,7 +2285,7 @@
 	"duration": 3330,
 	"artist": "Chris Hadfield",
 	"secret": false,
-	"lobby": true,
+	"lobby": false,
 	"jukebox": true,
 	"genre": "Pop"
 	},
@@ -2895,7 +2895,7 @@
 	"duration": 2730,
 	"artist": "Hall & Oates",
 	"secret": false,
-	"lobby": true,
+	"lobby": false,
 	"jukebox": true,
 	"genre": "Pop"
 	},
@@ -4363,7 +4363,7 @@
 	"artist": "Network Music Ensemble",
 	"genre": "Rock",
 	"secret": false,
-	"lobby": true,
+	"lobby": false,
 	"jukebox": true
 	},
 	{
@@ -4423,7 +4423,7 @@
 	"artist": "Fiona Apple",
 	"genre": "Electronic",
 	"secret": false,
-	"lobby": true,
+	"lobby": false,
 	"jukebox": true
 	},
 	{
@@ -4433,7 +4433,7 @@
 	"artist": "Kamil Hala, Slovak Philharmonic Orchestra, Libor Pešek",
 	"genre": "Classical and Orchestral",
 	"secret": false,
-	"lobby": true,
+	"lobby": false,
 	"jukebox": true
 	},
 	{
@@ -4573,7 +4573,7 @@
 	"artist": "Julia Ecklar & Anne Prather",
 	"genre": "Folk and Indie",
 	"secret": false,
-	"lobby": true,
+	"lobby": false,
 	"jukebox": true
 	},
 	{
@@ -4623,7 +4623,7 @@
 	"artist": "Free Fall & Other Delights",
 	"genre": "Folk and Indie",
 	"secret": false,
-	"lobby": true,
+	"lobby": false,
 	"jukebox": true
 	},
 	{
@@ -4643,7 +4643,7 @@
 	"artist": "Duane Elms",
 	"genre": "Folk and Indie",
 	"secret": false,
-	"lobby": true,
+	"lobby": false,
 	"jukebox": true
 	},
 	{
@@ -4653,7 +4653,7 @@
 	"artist": "Duane Elms",
 	"genre": "Folk and Indie",
 	"secret": false,
-	"lobby": true,
+	"lobby": false,
 	"jukebox": true
 	},
 	{
@@ -4663,7 +4663,7 @@
 	"artist": "Duane Elms",
 	"genre": "Folk and Indie",
 	"secret": false,
-	"lobby": true,
+	"lobby": false,
 	"jukebox": true
 	},
 	{
@@ -4762,6 +4762,406 @@
 	"artist": "emamouse",
 	"genre": "Folk and Indie",
 	"secret": true,
+	"lobby": false,
+	"jukebox": true
+	},
+	{
+	"url" : "https://files.catbox.moe/mvdhbk.mp3",
+	"title": "HoverGoat",
+	"duration": 1810,
+	"artist": "Madducks",
+	"genre": "Electronic",
+	"secret": false,
+	"lobby": true,
+	"jukebox": true
+	},
+	{
+	"url" : "https://files.catbox.moe/cul20c.mp3",
+	"title": "Flowing Uphill",
+	"duration": 3050,
+	"artist": "Chronoquest",
+	"genre": "Electronic",
+	"secret": false,
+	"lobby": true,
+	"jukebox": true
+	},
+	{
+	"url" : "https://files.catbox.moe/cdf7ab.mp3",
+	"title": "Future Imperfect",
+	"duration": 1820,
+	"artist": "Chronoquest",
+	"genre": "Electronic",
+	"secret": false,
+	"lobby": true,
+	"jukebox": true
+	},
+	{
+	"url" : "https://files.catbox.moe/aude0k.mp3",
+	"title": "Space Station 3",
+	"duration": 1960,
+	"artist": "Chronoquest",
+	"genre": "Electronic",
+	"secret": false,
+	"lobby": true,
+	"jukebox": true
+	},
+	{
+	"url" : "https://files.catbox.moe/cjx1lj.mp3",
+	"title": "Sitar Warriors",
+	"duration": 1400,
+	"artist": "Chronoquest",
+	"genre": "Electronic",
+	"secret": false,
+	"lobby": true,
+	"jukebox": true
+	},
+	{
+	"url" : "https://files.catbox.moe/ebcxxz.mp3",
+	"title": "Rare Brotherman Bill",
+	"duration": 1870,
+	"artist": "Terrible Tim",
+	"genre": "Folk and Indie",
+	"secret": false,
+	"lobby": true,
+	"jukebox": true
+	},
+	{
+	"url" : "https://files.catbox.moe/b9i0yh.mp3",
+	"title": "Paleorock",
+	"duration": 930,
+	"artist": "Bizaonacci",
+	"genre": "Folk and Indie",
+	"secret": false,
+	"lobby": true,
+	"jukebox": true
+	},
+	{
+	"url" : "https://files.catbox.moe/a6osd4.mp3",
+	"title": "Modern Day Ouroborus",
+	"duration": 3050,
+	"artist": "LISA:The Pointless",
+	"genre": "Electronic",
+	"secret": false,
+	"lobby": true,
+	"jukebox": true
+	},
+	{
+	"url" : "https://files.catbox.moe/oe3r2f.mp3",
+	"title": "Look Forward",
+	"duration": 2470,
+	"artist": "Skyline",
+	"genre": "Electronic",
+	"secret": false,
+	"lobby": true,
+	"jukebox": true
+	},
+	{
+	"url" : "https://files.catbox.moe/lp8vn9.mp3",
+	"title": "Happy Xmas (War Is Over) (Ultimate Mix)",
+	"duration": 2150,
+	"artist": "John Lennon",
+	"genre": "Holiday",
+	"secret": false,
+	"lobby": false,
+	"jukebox": true
+	},
+	{
+	"url" : "https://files.catbox.moe/3fl6fa.mp3",
+	"title": "Grandma Got Run-over by a Reindeer",
+	"duration": 2090,
+	"artist": "The Irish Rovers",
+	"genre": "Holiday",
+	"secret": false,
+	"lobby": false,
+	"jukebox": true
+	},
+	{
+	"url" : "https://files.catbox.moe/2k0ssn.mp3",
+	"title": "We Wish You a Merry Christmas",
+	"duration": 990,
+	"artist": "Love to Sing",
+	"genre": "Holiday",
+	"secret": false,
+	"lobby": false,
+	"jukebox": true
+	},
+	{
+	"url" : "https://files.catbox.moe/0uzqey.mp3",
+	"title": "Santa Claus Is Coming To Town",
+	"duration": 1340,
+	"artist": "Frank Sinatra",
+	"genre": "Holiday",
+	"secret": false,
+	"lobby": false,
+	"jukebox": true
+	},
+	{
+	"url" : "https://files.catbox.moe/7pqtlw.mp3",
+	"title": "Frosty The Snowman",
+	"duration": 1370,
+	"artist": "Gene Autry",
+	"genre": "Holiday",
+	"secret": false,
+	"lobby": false,
+	"jukebox": true
+	},
+	{
+	"url" : "https://files.catbox.moe/fpjke2.mp3",
+	"title": "Collective Christmas",
+	"duration": 3520,
+	"artist": "Anyone Can Cook",
+	"genre": "Holiday",
+	"secret": true,
+	"lobby": false,
+	"jukebox": true
+	},
+	{
+	"url" : "https://files.catbox.moe/1s6mgh.mp3",
+	"title": "Last Christmas",
+	"duration": 2630,
+	"artist": "WHAM!",
+	"genre": "Holiday",
+	"secret": false,
+	"lobby": false,
+	"jukebox": true
+	},
+	{
+	"url" : "https://files.catbox.moe/kzqr6q.mp3",
+	"title": "Jingle Bell Rock",
+	"duration": 1310,
+	"artist": "Bobbly Helms",
+	"genre": "Holiday",
+	"secret": false,
+	"lobby": false,
+	"jukebox": true
+	},
+	{
+	"url" : "https://files.catbox.moe/bldhla.mp3",
+	"title": "Christmas Eve / Sarajevo (Timeless Version)",
+	"duration": 2230,
+	"artist": "Trans-Siberian Orchestra",
+	"genre": "Holiday",
+	"secret": false,
+	"lobby": false,
+	"jukebox": true
+	},
+	{
+	"url" : "https://files.catbox.moe/3zshxc.mp3",
+	"title": "Wizards in Winter",
+	"duration": 1850,
+	"artist": "Trans-Siberian Orchestra",
+	"genre": "Holiday",
+	"secret": false,
+	"lobby": false,
+	"jukebox": true
+	},
+	{
+	"url" : "https://files.catbox.moe/3fkihg.mp3",
+	"title": "All I Want For Christmas Is You",
+	"duration": 2350,
+	"artist": "Mariah Carey",
+	"genre": "Holiday",
+	"secret": false,
+	"lobby": false,
+	"jukebox": true
+	},
+	{
+	"url" : "https://files.catbox.moe/8jfqnz.mp3",
+	"title": "CRISIS CITY: ACT 1",
+	"duration": 1500,
+	"artist": "SEGA",
+	"genre": "Video Game",
+	"secret": false,
+	"lobby": false,
+	"jukebox": true
+	},
+	{
+	"url" : "https://files.catbox.moe/y2yn8p.mp3",
+	"title": "CRISIS CITY: ACT 2",
+	"duration": 1830,
+	"artist": "SEGA",
+	"genre": "Video Game",
+	"secret": false,
+	"lobby": false,
+	"jukebox": true
+	},
+	{
+	"url" : "https://files.catbox.moe/5qhvax.mp3",
+	"title": "Dangerous",
+	"duration": 2780,
+	"artist": "Big Data & Joywave",
+	"genre": "Rock",
+	"secret": false,
+	"lobby": false,
+	"jukebox": true
+	},
+	{
+	"url" : "https://files.catbox.moe/amy1g1.mp3",
+	"title": "Electric Avenue",
+	"duration": 2280,
+	"artist": "Eddy Grant",
+	"genre": "Disco, Funk, Soul, and R&B",
+	"secret": false,
+	"lobby": false,
+	"jukebox": true
+	},
+	{
+	"url" : "https://files.catbox.moe/1plpjp.mp3",
+	"title": "Hardware Store",
+	"duration": 2230,
+	"artist": "Weird Al Yankovic",
+	"genre": "Rock",
+	"secret": false,
+	"lobby": false,
+	"jukebox": true
+	},
+	{
+	"url" : "https://files.catbox.moe/995vw3.mp3",
+	"title": "Hayloft",
+	"duration": 1810,
+	"artist": "Mother Mother",
+	"genre": "Rock",
+	"secret": false,
+	"lobby": false,
+	"jukebox": true
+	},
+	{
+	"url" : "https://files.catbox.moe/bg1e3t.mp3",
+	"title": "Hayloft II",
+	"duration": 2150,
+	"artist": "Mother Mother",
+	"genre": "Rock",
+	"secret": false,
+	"lobby": false,
+	"jukebox": true
+	},
+	{
+	"url" : "https://files.catbox.moe/6ka39h.mp3",
+	"title": "INVISIBLE",
+	"duration": 1910,
+	"artist": "Duran Duran",
+	"genre": "Pop",
+	"secret": false,
+	"lobby": false,
+	"jukebox": true
+	},
+	{
+	"url" : "https://files.catbox.moe/q2flt8.mp3",
+	"title": "Messages from the Stars",
+	"duration": 4600,
+	"artist": "The Rah Band",
+	"genre": "Disco, Funk, Soul, and R&B",
+	"secret": false,
+	"lobby": false,
+	"jukebox": true
+	},
+	{
+	"url" : "https://files.catbox.moe/b75c8c.mp3",
+	"title": "Midnight City",
+	"duration": 2440,
+	"artist": "M83",
+	"genre": "Electronic",
+	"secret": false,
+	"lobby": false,
+	"jukebox": true
+	},
+	{
+	"url" : "https://files.catbox.moe/m6mznt.mp3",
+	"title": "My Way (2008 Remaster)",
+	"duration": 2760,
+	"artist": "Frank Sinatra",
+	"genre": "Pop",
+	"secret": false,
+	"lobby": false,
+	"jukebox": true
+	},
+	{
+	"url" : "https://files.catbox.moe/9i8ich.mp3",
+	"title": "My Way Of Life",
+	"duration": 1870,
+	"artist": "Frank Sinatra",
+	"genre": "Pop",
+	"secret": false,
+	"lobby": false,
+	"jukebox": true
+	},
+	{
+	"url" : "https://files.catbox.moe/aa1f1q.mp3",
+	"title": "Tequila",
+	"duration": 1340,
+	"artist": "The Champs",
+	"genre": "Rock",
+	"secret": false,
+	"lobby": false,
+	"jukebox": true
+	},
+	{
+	"url" : "https://files.catbox.moe/dxud77.mp3",
+	"title": "TF2: Faster Than A Speeding Bullet",
+	"duration": 850,
+	"artist": "Valve Studio Orchestra",
+	"genre": "Video Game",
+	"secret": false,
+	"lobby": false,
+	"jukebox": true
+	},
+	{
+	"url" : "https://files.catbox.moe/xs9sjk.mp3",
+	"title": "TF2: Main Theme",
+	"duration": 720,
+	"artist": "Valve Studio Orchestra",
+	"genre": "Video Game",
+	"secret": false,
+	"lobby": false,
+	"jukebox": true
+	},
+	{
+	"url" : "https://files.catbox.moe/k80s76.mp3",
+	"title": "TF2: Right Behind You",
+	"duration": 1010,
+	"artist": "Valve Studio Orchestra",
+	"genre": "Video Game",
+	"secret": false,
+	"lobby": false,
+	"jukebox": true
+	},
+	{
+	"url" : "https://files.catbox.moe/x18qw0.mp3",
+	"title": "TF2: Rocket Jump Waltz",
+	"duration": 390,
+	"artist": "Valve Studio Orchestra",
+	"genre": "Video Game",
+	"secret": false,
+	"lobby": false,
+	"jukebox": true
+	},
+	{
+	"url" : "https://files.catbox.moe/bfj6e7.mp3",
+	"title": "TF2: Rocket Jump Waltz (Remix)",
+	"duration": 1900,
+	"artist": "Squiller",
+	"genre": "Video Game",
+	"secret": false,
+	"lobby": false,
+	"jukebox": true
+	},
+	{
+	"url" : "https://files.catbox.moe/9i47e3.mp3",
+	"title": "TF2: Soldier Of Dance",
+	"duration": 680,
+	"artist": "Valve Studio Orchestra",
+	"genre": "Video Game",
+	"secret": false,
+	"lobby": false,
+	"jukebox": true
+	},
+	{
+	"url" : "https://files.catbox.moe/ro7172.mp3",
+	"title": "The Set Up",
+	"duration": 2430,
+	"artist": "Favored Nations",
+	"genre": "Pop",
+	"secret": false,
 	"lobby": false,
 	"jukebox": true
 	}

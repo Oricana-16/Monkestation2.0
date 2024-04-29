@@ -28,6 +28,7 @@
 //Gives player-controlled variants the ability to swap attacks
 /mob/living/simple_animal/hostile/asteroid/elite/Initialize(mapload)
 	. = ..()
+	AddComponent(/datum/component/seethrough_mob)
 	for(var/action_type in attack_action_types)
 		var/datum/action/innate/elite_attack/attack_action = new action_type()
 		attack_action.Grant(src)
@@ -36,7 +37,7 @@
 /mob/living/simple_animal/hostile/asteroid/elite/AttackingTarget()
 	if(ishostile(target))
 		var/mob/living/simple_animal/hostile/M = target
-		if(faction_check_mob(M))
+		if(faction_check_atom(M))
 			return FALSE
 	if(istype(target, /obj/structure/elite_tumor))
 		var/obj/structure/elite_tumor/T = target
@@ -189,8 +190,16 @@ While using this makes the system rely on OnFire, it still gives options for tim
 				addtimer(CALLBACK(src, PROC_REF(spawn_elite)), 30)
 				return
 			visible_message(span_boldwarning("Something within [src] stirs..."))
-			var/list/candidates = poll_candidates_for_mob("Do you want to play as a lavaland elite?", ROLE_SENTIENCE, ROLE_SENTIENCE, 5 SECONDS, src, POLL_IGNORE_LAVALAND_ELITE)
-			if(candidates.len)
+			var/list/candidates = SSpolling.poll_ghost_candidates_for_mob(
+				"Do you want to play as a lavaland elite?",
+				role = ROLE_SENTIENCE,
+				poll_time = 5 SECONDS,
+				target_mob = src,
+				ignore_category = POLL_IGNORE_LAVALAND_ELITE,
+				pic_source = src,
+				role_name_text = "lavaland elite"
+			)
+			if(length(candidates))
 				audible_message(span_boldwarning("The stirring sounds increase in volume!"))
 				elitemind = pick(candidates)
 				elitemind.playsound_local(get_turf(elitemind), 'sound/effects/magic.ogg', 40, 0)
@@ -216,7 +225,7 @@ While using this makes the system rely on OnFire, it still gives options for tim
 		notify_ghosts("\A [mychild] has been awakened in \the [get_area(src)]!", source = mychild, action = NOTIFY_ORBIT, flashwindow = FALSE, header = "Lavaland Elite awakened")
 	mychild.log_message("has been awakened by [key_name(activator)]!", LOG_GAME, color="#960000")
 	icon_state = "tumor_popped"
-	RegisterSignal(mychild, COMSIG_PARENT_QDELETING, PROC_REF(onEliteLoss))
+	RegisterSignal(mychild, COMSIG_QDELETING, PROC_REF(onEliteLoss))
 	INVOKE_ASYNC(src, PROC_REF(arena_checks))
 
 /obj/structure/elite_tumor/proc/return_elite()
@@ -246,7 +255,7 @@ While using this makes the system rely on OnFire, it still gives options for tim
 		return
 	activator = user
 	ADD_TRAIT(user, TRAIT_ELITE_CHALLENGER, REF(src))
-	RegisterSignal(user, COMSIG_PARENT_QDELETING, PROC_REF(clear_activator))
+	RegisterSignal(user, COMSIG_QDELETING, PROC_REF(clear_activator))
 	user.log_message("has activated an elite tumor!", LOG_GAME, color="#960000")
 
 /obj/structure/elite_tumor/proc/clear_activator(mob/source)
@@ -255,7 +264,7 @@ While using this makes the system rely on OnFire, it still gives options for tim
 		return
 	activator = null
 	REMOVE_TRAIT(source, TRAIT_ELITE_CHALLENGER, REF(src))
-	UnregisterSignal(source, COMSIG_PARENT_QDELETING)
+	UnregisterSignal(source, COMSIG_QDELETING)
 
 /obj/structure/elite_tumor/process(seconds_per_tick)
 	if(!isturf(loc))
