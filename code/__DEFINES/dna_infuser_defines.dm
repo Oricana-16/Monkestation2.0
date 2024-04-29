@@ -15,3 +15,10 @@
 
 /// dna infuser won't upgrade past this tier
 #define DNA_INFUSER_MAX_TIER 2
+
+// Tier 1 Progression Goal (0 -> 4 / 4)
+#define DNA_INFUSER_PROG_ONE = 4
+// Tier 2 Progression Goal (4 -> 10 / 6)
+#define DNA_INFUSER_PROG_TWO = 10
+// Tier 3 Progression Goal (10 -> 18 / 8)
+#define DNA_INFUSER_PROG_THREE = 18

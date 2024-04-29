@@ -20,6 +20,12 @@
 	var/atom/movable/infusing_from
 	///what we're turning into
 	var/datum/infuser_entry/infusing_into
+
+	//current XP, amounts of organs infused
+	var/progression = 0
+	//current XP Goal
+	var/progression_goal = DNA_INFUSER_PROG_ONE
+
 	///a message for relaying that the machine is locked if someone tries to leave while it's active
 	COOLDOWN_DECLARE(message_cooldown)
 
@@ -135,7 +141,7 @@
 	// Valid organ successfully picked.
 	new_organ = new new_organ()
 	new_organ.replace_into(target)
-	check_tier_progression(target)
+	update_tier_experience()
 
 /// Picks a random mutated organ from the infuser entry which is also compatible with the target mob.
 /// Tries to return a typepath of a valid mutant organ if all of the following criteria are true:
@@ -162,8 +168,27 @@
 		return pick(potential_new_organs)
 	return FALSE
 
+/obj/machinery/dna_infuser/proc/update_tier_experience()
+	progression++
+
+	if(max_tier_allowed != DNA_INFUSER_MAX_TIER\
+		&& infusing_into.tier == max_tier_allowed \
+		&& progression >= progression_goal){
+			max_tier_allowed++
+			switch(max_tier_allowed){
+				if(1)
+					progression_goal = DNA_INFUSER_PROG_ONE
+				if(2)
+					progression_goal = DNA_INFUSER_PROG_TWO
+				if(3)
+					progression_goal = DNA_INFUSER_PROG_THREE
+			}
+		}
+
+	check_tier_progression()
+
 /// checks to see if the machine should progress a new tier.
-/obj/machinery/dna_infuser/proc/check_tier_progression(mob/living/carbon/human/target)
+/obj/machinery/dna_infuser/proc/check_tier_progression()
 	if(
 		max_tier_allowed != DNA_INFUSER_MAX_TIER \
 		&& infusing_into.tier == max_tier_allowed \
