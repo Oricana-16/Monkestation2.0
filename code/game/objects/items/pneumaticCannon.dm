@@ -50,6 +50,7 @@
 
 /obj/item/pneumatic_cannon/Initialize(mapload)
 	. = ..()
+	AddComponent(/datum/component/shell, list(new /obj/item/circuit_component/pneumatic_cannon), SHELL_CAPACITY_SMALL) //MONKESTATION ADDITION
 	if(selfcharge)
 		init_charge()
 
@@ -336,6 +337,48 @@
 	charge_type = /obj/item/food/pie/cream/nostun
 	maxWeightClass = 6 //2 pies
 	charge_ticks = 2 //4 second/pie
+
+/obj/item/circuit_component/pneumatic_cannon
+	display_name = "Pneumatic Cannon"
+	desc = "A cannon that fires at the selected location."
+	circuit_flags = CIRCUIT_FLAG_INPUT_SIGNAL
+
+	/// If set, the trigger input will target this atom.
+	var/datum/port/input/target
+
+	/// Called whenever this is fired, regardless of by circuit or by hadn
+	var/datum/port/output/fired
+
+	/// The cannon this circut is attached to.
+	var/obj/item/pneumatic_cannon/cannon
+
+// MONKESTATION ADDITION - Circuit Shell
+/obj/item/circuit_component/pneumatic_cannon/populate_ports()
+	target = add_input_port("Target", PORT_TYPE_ATOM)
+
+	fired = add_output_port("Fired", PORT_TYPE_SIGNAL)
+
+
+/obj/item/circuit_component/bluespace_launchpad/get_ui_notices()
+	. = ..()
+	. += create_ui_notice("Maximum Range: 5 tiles", "orange", "info")
+
+/obj/item/circuit_component/pneumatic_cannon/register_shell(atom/movable/shell)
+	. = ..()
+	cannon = shell
+
+/obj/item/circuit_component/pneumatic_cannon/unregister_shell(atom/movable/shell)
+	cannon = null
+	return ..()
+
+/obj/item/circuit_component/camera/input_received(datum/port/input/port)
+	var/atom/target = target.value
+	if(!target)
+		return
+	if(get_dist(cannon,target) > 5)
+		return
+	cannon.fire_items(target,null)
+// MONKESTATION ADDITION END
 
 #undef PCANNON_FIREALL
 #undef PCANNON_FILO
