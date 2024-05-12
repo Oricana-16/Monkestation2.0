@@ -372,12 +372,12 @@
 	return ..()
 
 /obj/item/circuit_component/pneumatic_cannon/input_received(datum/port/input/port)
-	var/atom/target = target.value
-	if(!target)
+	var/atom/cannon_target = target.value
+	if(!cannon_target)
 		return
-	if(get_dist(cannon,target) > 5)
+	if(get_dist(cannon,cannon_target) > 5)
 		return
-	cannon.fire_items(target,null)
+	cannon.fire_items(cannon_target,null)
 // MONKESTATION ADDITION END
 
 #undef PCANNON_FIREALL
