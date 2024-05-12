@@ -359,7 +359,7 @@
 	fired = add_output_port("Fired", PORT_TYPE_SIGNAL)
 
 
-/obj/item/circuit_component/bluespace_launchpad/get_ui_notices()
+/obj/item/circuit_component/pneumatic_cannon/get_ui_notices()
 	. = ..()
 	. += create_ui_notice("Maximum Range: 5 tiles", "orange", "info")
 
@@ -371,7 +371,7 @@
 	cannon = null
 	return ..()
 
-/obj/item/circuit_component/camera/input_received(datum/port/input/port)
+/obj/item/circuit_component/pneumatic_cannon/input_received(datum/port/input/port)
 	var/atom/target = target.value
 	if(!target)
 		return
