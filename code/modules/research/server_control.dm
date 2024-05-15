@@ -14,6 +14,11 @@
 	if(!CONFIG_GET(flag/no_default_techweb_link) && !stored_research)
 		stored_research = SSresearch.science_tech
 
+	// MONKESTATION ADDITION
+	AddComponent(/datum/component/usb_port, list(
+		/obj/item/circuit_component/rd_server_data,
+	))
+
 /obj/machinery/computer/rdservercontrol/multitool_act(mob/living/user, obj/item/multitool/tool)
 	if(!QDELETED(tool.buffer) && istype(tool.buffer, /datum/techweb))
 		stored_research = tool.buffer
@@ -83,3 +88,55 @@
 				return FALSE
 			console_selected.locked = !console_selected.locked
 			return TRUE
+
+// MONKESTATION ADDITION - USB Port
+
+
+/obj/item/circuit_component/rd_server_data
+	display_name = "R&D Research History"
+	desc = "Outputs the Research History."
+	circuit_flags = CIRCUIT_FLAG_INPUT_SIGNAL|CIRCUIT_FLAG_OUTPUT_SIGNAL
+
+	/// The Research History
+	var/datum/port/output/history
+
+	var/obj/machinery/computer/rdservercontrol/attached_console
+
+/obj/item/circuit_component/rd_server_data/populate_ports()
+	history = add_output_port("Research History", PORT_TYPE_TABLE)
+
+/obj/item/circuit_component/rd_server_data/register_usb_parent(atom/movable/shell)
+	. = ..()
+	if(istype(shell, /obj/machinery/computer/rdservercontrol))
+		attached_console = shell
+
+/obj/item/circuit_component/rd_server_data/unregister_usb_parent(atom/movable/shell)
+	attached_console = null
+	return ..()
+
+/obj/item/circuit_component/rd_server_data/get_ui_notices()
+	. = ..()
+	. += create_table_notices(list(
+		"research",
+		"cost",
+		"researcher",
+		"location",
+	))
+
+/obj/item/circuit_component/rd_server_data/input_received(datum/port/input/port)
+
+	if(!attached_console || !attached_console.stored_research)
+		return
+
+	var/list/new_table = list()
+	for(var/list/research_log as anything in attached_console.stored_research.research_logs)
+		var/list/entry = list()
+		entry["research"] = research_log["node_name"]
+		entry["cost"] = research_log["node_cost"]
+		entry["researcher"] = research_log["node_researcher"]
+		entry["location"] = research_log["node_research_location"]
+		new_table += list(entry)
+
+	history.set_output(new_table)
+
+// MONKESTATION ADDITION END
